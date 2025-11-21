@@ -1,0 +1,315 @@
+// Orb Creator Module
+// Creates 3D liquid orbs with environmental data visualization
+
+import { apiService } from './api-service.js';
+import { CONFIG } from '../config.js';
+
+class OrbCreator {
+    constructor() {
+        this.orbs = [];
+        this.scene = null;
+        this.liquidShaderMaterial = null;
+    }
+
+    /**
+     * Initialize orb creator with Three.js scene
+     * @param {THREE.Scene} scene - Three.js scene
+     */
+    initialize(scene) {
+        this.scene = scene;
+        this.createLiquidShaderMaterial();
+    }
+
+    /**
+     * Create custom shader material for liquid orb effect
+     */
+    createLiquidShaderMaterial() {
+        const vertexShader = `
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform float time;
+      uniform float morphFactor;
+      uniform float spikiness;
+      
+      // Simplex noise function (simplified)
+      vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+      
+      float snoise(vec3 v) {
+        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+        
+        vec3 i  = floor(v + dot(v, C.yyy));
+        vec3 x0 = v - i + dot(i, C.xxx);
+        
+        vec3 g = step(x0.yzx, x0.xyz);
+        vec3 l = 1.0 - g;
+        vec3 i1 = min(g.xyz, l.zxy);
+        vec3 i2 = max(g.xyz, l.zxy);
+        
+        vec3 x1 = x0 - i1 + C.xxx;
+        vec3 x2 = x0 - i2 + C.yyy;
+        vec3 x3 = x0 - D.yyy;
+        
+        i = mod289(i);
+        vec4 p = permute(permute(permute(
+          i.z + vec4(0.0, i1.z, i2.z, 1.0))
+          + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+          + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+        
+        float n_ = 0.142857142857;
+        vec3 ns = n_ * D.wyz - D.xzx;
+        
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+        
+        vec4 x_ = floor(j * ns.z);
+        vec4 y_ = floor(j - 7.0 * x_);
+        
+        vec4 x = x_ *ns.x + ns.yyyy;
+        vec4 y = y_ *ns.x + ns.yyyy;
+        vec4 h = 1.0 - abs(x) - abs(y);
+        
+        vec4 b0 = vec4(x.xy, y.xy);
+        vec4 b1 = vec4(x.zw, y.zw);
+        
+        vec4 s0 = floor(b0)*2.0 + 1.0;
+        vec4 s1 = floor(b1)*2.0 + 1.0;
+        vec4 sh = -step(h, vec4(0.0));
+        
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+        
+        vec3 p0 = vec3(a0.xy, h.x);
+        vec3 p1 = vec3(a0.zw, h.y);
+        vec3 p2 = vec3(a1.xy, h.z);
+        vec3 p3 = vec3(a1.zw, h.w);
+        
+        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+        p0 *= norm.x;
+        p1 *= norm.y;
+        p2 *= norm.z;
+        p3 *= norm.w;
+        
+        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+        m = m * m;
+        return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+      }
+      
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        
+        // Add noise-based distortion
+        float noise = snoise(position * 2.0 + time * 0.5);
+        float displacement = noise * morphFactor * 0.3;
+        
+        // Add spiky distortion
+        float spikeNoise = snoise(position * 5.0 + time);
+        displacement += spikeNoise * spikiness * 0.2;
+        
+        vec3 newPosition = position + normal * displacement;
+        vPosition = newPosition;
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+      }
+    `;
+
+        const fragmentShader = `
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec2 vUv;
+      uniform vec3 color1;
+      uniform vec3 color2;
+      uniform float time;
+      uniform float opacity;
+      
+      void main() {
+        // Fresnel effect
+        vec3 viewDirection = normalize(cameraPosition - vPosition);
+        float fresnel = pow(1.0 - dot(viewDirection, vNormal), 3.0);
+        
+        // Animated color mixing
+        float mixFactor = sin(time + vPosition.y * 3.0) * 0.5 + 0.5;
+        vec3 color = mix(color1, color2, mixFactor);
+        
+        // Add fresnel glow
+        color += fresnel * 0.5;
+        
+        // Pulsing effect
+        float pulse = sin(time * 2.0) * 0.1 + 0.9;
+        
+        gl_FragColor = vec4(color * pulse, opacity);
+      }
+    `;
+
+        this.liquidShaderMaterial = {
+            vertexShader,
+            fragmentShader
+        };
+    }
+
+    /**
+     * Create an orb at a position with environmental data
+     * @param {THREE.Vector3} position - Position in AR space
+     * @param {Object} weatherData - Weather data
+     * @param {Object} airQualityData - Air quality data
+     * @returns {THREE.Mesh} Orb mesh
+     */
+    async createOrb(position) {
+        try {
+            // Get current location
+            const location = await apiService.getCurrentLocation();
+
+            // Fetch environmental data
+            const [weatherData, airQualityData] = await Promise.all([
+                apiService.getWeather(location.lat, location.lon),
+                apiService.getAirQuality(location.lat, location.lon)
+            ]);
+
+            // Map data to visual properties
+            const visualProps = this.mapDataToVisuals(weatherData, airQualityData);
+
+            // Create orb geometry
+            const geometry = new THREE.SphereGeometry(CONFIG.ar.orbScale, 32, 32);
+
+            // Create material with shader
+            const material = new THREE.ShaderMaterial({
+                vertexShader: this.liquidShaderMaterial.vertexShader,
+                fragmentShader: this.liquidShaderMaterial.fragmentShader,
+                uniforms: {
+                    time: { value: 0 },
+                    color1: { value: new THREE.Color(visualProps.color) },
+                    color2: { value: new THREE.Color(visualProps.color).offsetHSL(0, 0, 0.2) },
+                    morphFactor: { value: visualProps.morphFactor },
+                    spikiness: { value: visualProps.spikiness },
+                    opacity: { value: 0.85 }
+                },
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+
+            // Create mesh
+            const orb = new THREE.Mesh(geometry, material);
+            orb.position.copy(position);
+
+            // Store metadata
+            orb.userData = {
+                type: 'orb',
+                weatherData,
+                airQualityData,
+                visualProps,
+                animationSpeed: visualProps.animationSpeed,
+                createdAt: Date.now()
+            };
+
+            // Add to scene
+            if (this.scene) {
+                this.scene.add(orb);
+            }
+
+            this.orbs.push(orb);
+
+            // Limit number of orbs
+            if (this.orbs.length > CONFIG.performance.maxOrbs) {
+                this.removeOrb(this.orbs[0]);
+            }
+
+            return orb;
+        } catch (error) {
+            console.error('Failed to create orb:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Map environmental data to visual properties
+     */
+    mapDataToVisuals(weatherData, airQualityData) {
+        // Map air quality to color
+        const aqi = airQualityData.aqiUS;
+        let color;
+
+        if (aqi <= CONFIG.airQuality.thresholds[0]) {
+            color = CONFIG.airQuality.colors.good;
+        } else if (aqi <= CONFIG.airQuality.thresholds[1]) {
+            color = CONFIG.airQuality.colors.moderate;
+        } else if (aqi <= CONFIG.airQuality.thresholds[2]) {
+            color = CONFIG.airQuality.colors.unhealthy;
+        } else if (aqi <= CONFIG.airQuality.thresholds[3]) {
+            color = CONFIG.airQuality.colors.veryUnhealthy;
+        } else {
+            color = CONFIG.airQuality.colors.hazardous;
+        }
+
+        // Map weather to shape
+        const condition = weatherData.condition.toLowerCase();
+        const shapeConfig = CONFIG.weather.shapes[condition] || CONFIG.weather.shapes.clear;
+
+        // Map temperature to animation speed
+        const temp = weatherData.temperature;
+        const tempNormalized = (temp - CONFIG.temperature.minTemp) /
+            (CONFIG.temperature.maxTemp - CONFIG.temperature.minTemp);
+        const animationSpeed = CONFIG.temperature.minSpeed +
+            (tempNormalized * (CONFIG.temperature.maxSpeed - CONFIG.temperature.minSpeed));
+
+        return {
+            color,
+            morphFactor: shapeConfig.morphFactor,
+            spikiness: shapeConfig.spikiness,
+            animationSpeed: Math.max(CONFIG.temperature.minSpeed, Math.min(animationSpeed, CONFIG.temperature.maxSpeed))
+        };
+    }
+
+    /**
+     * Update orb animations
+     * @param {number} deltaTime - Time since last frame
+     */
+    update(deltaTime) {
+        this.orbs.forEach(orb => {
+            if (orb.material.uniforms) {
+                orb.material.uniforms.time.value += deltaTime * orb.userData.animationSpeed;
+            }
+
+            // Gentle floating animation
+            orb.position.y += Math.sin(Date.now() * 0.001 + orb.userData.createdAt) * 0.0001;
+        });
+    }
+
+    /**
+     * Remove an orb
+     */
+    removeOrb(orb) {
+        const index = this.orbs.indexOf(orb);
+        if (index > -1) {
+            this.orbs.splice(index, 1);
+        }
+
+        if (this.scene && orb.parent === this.scene) {
+            this.scene.remove(orb);
+        }
+
+        if (orb.geometry) orb.geometry.dispose();
+        if (orb.material) orb.material.dispose();
+    }
+
+    /**
+     * Get all orbs
+     */
+    getAllOrbs() {
+        return this.orbs;
+    }
+
+    /**
+     * Clear all orbs
+     */
+    clearAllOrbs() {
+        this.orbs.forEach(orb => this.removeOrb(orb));
+        this.orbs = [];
+    }
+}
+
+// Export singleton instance
+export const orbCreator = new OrbCreator();

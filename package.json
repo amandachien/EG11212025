@@ -1,0 +1,30 @@
+{
+  "name": "webar-plant-game",
+  "version": "1.0.0",
+  "description": "Interactive WebAR game with plant detection, hand gestures, and environmental data visualization",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "netlify deploy --prod"
+  },
+  "keywords": [
+    "webxr",
+    "ar",
+    "plant-detection",
+    "hand-tracking",
+    "environmental-data"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.160.0",
+    "@mediapipe/hands": "^0.4.1646559476",
+    "@mediapipe/camera_utils": "^0.3.1640029074",
+    "@tensorflow/tfjs": "^4.15.0",
+    "@tensorflow-models/deeplab": "^0.2.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.10.1"
+  }
+}
