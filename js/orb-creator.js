@@ -1,6 +1,7 @@
 // Orb Creator Module
 // Creates 3D liquid orbs with environmental data visualization
 
+import * as THREE from 'three';
 import { apiService } from './api-service.js';
 import { CONFIG } from '../config.js';
 

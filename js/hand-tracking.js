@@ -34,10 +34,15 @@ class HandTracking {
         }
 
         try {
+            // Check if MediaPipe is loaded
+            if (typeof window.Hands === 'undefined') {
+                throw new Error('MediaPipe Hands library not loaded. Please check CDN links.');
+            }
+
             // Initialize MediaPipe Hands
-            this.hands = new Hands({
+            this.hands = new window.Hands({
                 locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646559476/${file}`;
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
                 }
             });
 
@@ -51,15 +56,18 @@ class HandTracking {
             this.hands.onResults((results) => this.onResults(results));
 
             // Initialize camera
-            this.camera = new Camera(this.videoElement, {
+            if (typeof window.Camera === 'undefined') {
+                throw new Error('MediaPipe Camera library not loaded. Please check CDN links.');
+            }
+
+            this.camera = new window.Camera(this.videoElement, {
                 onFrame: async () => {
                     if (this.hands) {
                         await this.hands.send({ image: this.videoElement });
                     }
                 },
                 width: 1280,
-                height: 720,
-                facingMode: 'environment' // Use back camera on mobile
+                height: 720
             });
 
             await this.camera.start();
@@ -217,16 +225,16 @@ class HandTracking {
         ctx.save();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (results.multiHandLandmarks) {
+        if (results.multiHandLandmarks && window.drawConnectors && window.drawLandmarks) {
             for (const landmarks of results.multiHandLandmarks) {
                 // Draw connections
-                drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+                window.drawConnectors(ctx, landmarks, window.HAND_CONNECTIONS, {
                     color: '#00ff88',
                     lineWidth: 2
                 });
 
                 // Draw landmarks
-                drawLandmarks(ctx, landmarks, {
+                window.drawLandmarks(ctx, landmarks, {
                     color: '#00d4ff',
                     lineWidth: 1,
                     radius: 3

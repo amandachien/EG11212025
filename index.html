@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -7,31 +8,40 @@
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+
   <title>WebAR Plant Game</title>
-  
+
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <!-- Styles -->
   <link rel="stylesheet" href="/styles.css">
-  
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  
-  <!-- MediaPipe Hands -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646559476/hands.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js" crossorigin="anonymous"></script>
-  
+
+  <!-- Import Map for ES Modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <!-- MediaPipe Dependencies (loaded before modules) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
   <!-- TensorFlow.js for plant segmentation -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/deeplab@0.2.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/deeplab@0.2.1/dist/deeplab.min.js"></script>
 </head>
+
 <body>
   <!-- AR Container -->
   <div id="ar-container">
@@ -110,17 +120,17 @@
     <div class="controls-panel" id="controls-panel">
       <button class="control-btn" id="detect-plant-btn" title="Detect Plant">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v20M2 12h20"/>
+          <path d="M12 2v20M2 12h20" />
         </svg>
       </button>
       <button class="control-btn" id="create-orb-btn" title="Create Orb">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="10" />
         </svg>
       </button>
       <button class="control-btn" id="create-pendant-btn" title="Create Pendant" disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </button>
     </div>
@@ -134,13 +144,9 @@
 
   <!-- Configuration -->
   <script type="module" src="/config.js"></script>
-  
+
   <!-- JavaScript Modules -->
   <script type="module" src="/js/main.js"></script>
-  <script type="module" src="/js/api-service.js"></script>
-  <script type="module" src="/js/hand-tracking.js"></script>
-  <script type="module" src="/js/plant-detector.js"></script>
-  <script type="module" src="/js/orb-creator.js"></script>
-  <script type="module" src="/js/pendant-creator.js"></script>
 </body>
+
 </html>

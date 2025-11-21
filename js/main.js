@@ -1,6 +1,7 @@
 // Main Application Controller
 // Coordinates all modules and manages AR session
 
+import * as THREE from 'three';
 import { CONFIG } from '../config.js';
 import { apiService } from './api-service.js';
 import { handTracking } from './hand-tracking.js';

@@ -1,6 +1,7 @@
 // Pendant Creator Module
-// Creates plant pendants and connects them to orbs with breaklines
+// Creates plant pendants with connections to orbs
 
+import * as THREE from 'three';
 import { CONFIG } from '../config.js';
 import { plantDetector } from './plant-detector.js';
 import { orbCreator } from './orb-creator.js';
