@@ -171,6 +171,21 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 
 **Connections**: White animated lines will automatically connect the pendant to all existing orbs.
 
+## PlantNet Fallback
+
+The app uses a **two-tier plant identification system** for maximum reliability:
+
+1. **Primary**: Plant.id API (100 requests/month free tier)
+2. **Fallback**: PlantNet API (500 requests/day free tier)
+
+**How it works:**
+- If Plant.id fails (quota exceeded, network error, etc.), the app automatically tries PlantNet
+- PlantNet results are normalized to match the same data structure
+- Plants identified via PlantNet are marked with `source: 'PlantNet'` in the data
+- The fallback is completely transparent to the user
+
+**Verified**: ✅ PlantNet fallback is working correctly
+
 ## Device Compatibility
 
 ### Tested Devices
