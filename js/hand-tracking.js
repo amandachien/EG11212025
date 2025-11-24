@@ -248,7 +248,7 @@ class HandTracking {
         this.lastGestureTime = Date.now();
 
         // Get 3D position for AR placement
-        const position = this.getLandmarkPosition(landmarks);
+        const position = this.getLandmarkPosition(landmarks, gesture);
 
         // Trigger callbacks
         if (this.gestureCallbacks[gesture]) {
@@ -261,10 +261,23 @@ class HandTracking {
     }
 
     /**
-     * Get 3D position from hand landmarks (center of palm)
+     * Get 3D position from hand landmarks
+     * @param {Object} landmarks - Hand landmarks
+     * @param {string} gesture - Current gesture type
      */
-    getLandmarkPosition(landmarks) {
-        // Use wrist position as reference
+    getLandmarkPosition(landmarks, gesture) {
+        // If pinch, use midpoint between thumb and index
+        if (gesture === 'pinch') {
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            return {
+                x: (thumbTip.x + indexTip.x) / 2,
+                y: (thumbTip.y + indexTip.y) / 2,
+                z: (thumbTip.z + indexTip.z) / 2
+            };
+        }
+
+        // Default: Use wrist position as reference
         const wrist = landmarks[0];
         return {
             x: wrist.x,
