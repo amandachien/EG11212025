@@ -1,6 +1,6 @@
 {
-    "name": "WebAR Plant Game",
-    "short_name": "AR Plant",
+    "name": "pLaNt ExPlorEr",
+    "short_name": "pLaNt ExPlorEr",
     "description": "Interactive WebAR game with plant detection and environmental data visualization",
     "start_url": "/",
     "display": "standalone",
