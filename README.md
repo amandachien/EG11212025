@@ -4,24 +4,30 @@ An interactive WebAR mobile game that combines plant detection, hand gesture con
 
 ## Features
 
-- **Plant Detection**: Point your camera at any plant to identify it using AI
+- **Plant Detection**: Point your camera at any plant to identify it using AI (with PlantNet fallback)
 - **Hand Gestures**: 
-  - 🤏 **Pinch** to create environmental data orbs
+  - 🤏 **Pinch** to create environmental data orbs (improved reliability with 200ms cooldown)
   - ✋ **Open hand** to create plant pendants
+- **Y3K Aesthetic Orbs**:
+  - Futuristic metallic/holographic appearance
+  - Silver, neon pink, and electric blue gradients
+  - Pseudo-environment reflections for glossy look
 - **Environmental Data Visualization**:
   - Orb colors represent air quality
   - Orb shapes represent weather conditions
   - Animation speed represents temperature
 - **AR Connections**: White animated lines connect pendants to orbs
+- **Space Mono Font**: Clean, modern monospace typography throughout
 
 ## Technology Stack
 
 - **WebXR Device API** - Standards-based AR
-- **Three.js** - 3D graphics and rendering
+- **Three.js** - 3D graphics and rendering with custom Y3K shaders
 - **MediaPipe Hands** - Hand tracking and gesture detection
 - **TensorFlow.js + DeepLab** - Plant segmentation
 - **Netlify Functions** - Secure API proxying
-- **Plant.id API** - Plant identification
+- **Plant.id API** - Primary plant identification
+- **PlantNet API** - Fallback plant identification
 - **OpenWeatherMap API** - Weather and air quality data
 
 ## Prerequisites
@@ -58,15 +64,15 @@ Edit `.env` and add your API keys:
 
 ```env
 PLANT_ID_API_KEY=your_plant_id_api_key_here
+PLANTNET_API_KEY=your_plantnet_api_key_here
 OPENWEATHER_API_KEY=your_openweather_api_key_here
-AIR_QUALITY_API_KEY=your_air_quality_api_key_here
 ```
 
 **Get API Keys:**
 
 - **Plant.id**: https://web.plant.id/ (Free tier: 100 requests/month)
+- **PlantNet**: https://my.plantnet.org/ (Free tier: 500 requests/day)
 - **OpenWeatherMap**: https://openweathermap.org/api (Free tier: 1000 requests/day)
-- **Air Quality**: Using OpenWeatherMap Air Pollution API (same key)
 
 ### 4. Local Development
 
@@ -104,8 +110,8 @@ This will start a local server at `http://localhost:8888` with Netlify Functions
 1. Go to Site Settings → Environment Variables
 2. Add your API keys:
    - `PLANT_ID_API_KEY`
+   - `PLANTNET_API_KEY`
    - `OPENWEATHER_API_KEY`
-   - `AIR_QUALITY_API_KEY`
 
 #### Deploy:
 
@@ -143,9 +149,14 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 - Tap the orb button (⭕) to create an orb in front of you
 
 **Orb Visual Meaning:**
-- **Color**: Air quality (green=good, yellow=moderate, orange=unhealthy, red=hazardous)
+- **Aesthetic**: Y3K futuristic style with metallic/holographic appearance
+- **Color**: Air quality blended with Y3K palette (silver, neon pink, electric blue)
+  - Green tones = good air quality
+  - Yellow/orange tones = moderate/unhealthy
+  - Red/purple tones = hazardous
 - **Shape**: Weather (sphere=clear, elongated=rain, spiky=storm)
 - **Animation**: Temperature (slower=cold, faster=hot)
+- **Reflections**: Pseudo-environment reflections for glossy, premium look
 
 ### Creating Plant Pendants
 
@@ -208,9 +219,12 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 
 ### Orbs/Pendants Not Appearing
 
+- **Hard refresh** your browser: `Cmd + Shift + R` (Mac) or `Ctrl + Shift + R` (Windows)
+- Orbs now have fallback data and should always appear (even if APIs fail)
 - Check browser console for errors
 - Ensure WebGL is supported
-- Try refreshing the page
+- Status indicator shows "Creating orb..." during creation
+- If you see "Orb creation failed", check your internet connection
 
 ## Security Notes
 
