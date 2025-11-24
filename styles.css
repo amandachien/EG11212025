@@ -502,6 +502,7 @@ body {
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-bg);
+  font-family: 'Space Mono', monospace;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;

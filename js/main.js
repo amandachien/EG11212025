@@ -317,30 +317,19 @@ class ARPlantGame {
     }
 
     /**
-     * Handle fist gesture (Restart ALL)
+     * Handle fist gesture (Clear All Objects)
      */
     async onFistGesture() {
-        console.log('Fist gesture detected: Restarting ALL');
+        console.log('Fist gesture detected: Clearing all objects');
 
         // Clear all AR objects
         orbCreator.clearAllOrbs();
         pendantCreator.clearAll();
 
-        // Clear detected plants
-        plantDetector.clearPlants();
-
-        // Reset UI
-        this.hidePlantInfo();
-        this.ui.createPendantBtn.disabled = true;
-        this.ui.tempValue.textContent = '--°C';
-        this.ui.weatherValue.textContent = '--';
-        this.ui.aqiValue.textContent = '--';
-
         // Update status
-        this.updateStatus('System Restarted');
+        this.updateStatus('Cleared Objects');
 
         // Show brief notification
-        const originalText = this.ui.statusText.textContent;
         setTimeout(() => {
             this.updateStatus('AR Active');
         }, 2000);
