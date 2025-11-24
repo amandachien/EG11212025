@@ -286,10 +286,22 @@ class ARPlantGame {
         const position = this.handPositionToARSpace(handPosition);
 
         try {
+            // Show feedback that orb creation started
+            this.updateStatus('Creating orb...');
+
             const orb = await orbCreator.createOrb(position);
             this.updateEnvironmentalData(orb.userData.weatherData, orb.userData.airQualityData);
+
+            // Reset status
+            this.updateStatus('AR Active');
         } catch (error) {
             console.error('Failed to create orb from gesture:', error);
+            this.updateStatus('Orb creation failed');
+
+            // Reset status after brief delay
+            setTimeout(() => {
+                this.updateStatus('AR Active');
+            }, 2000);
         }
     }
 

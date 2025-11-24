@@ -47,7 +47,7 @@ export const CONFIG = {
   gestures: {
     pinchThreshold: 0.05,      // Distance threshold for pinch detection
     openHandThreshold: 0.85,   // Confidence threshold for open hand
-    cooldownMs: 500,           // Cooldown between gesture triggers
+    cooldownMs: 200,           // Cooldown between gesture triggers (reduced for better responsiveness)
     fistPinchExclusion: 0.1    // Distance to exclude fist if pinch-like
   },
 

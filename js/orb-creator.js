@@ -185,69 +185,81 @@ class OrbCreator {
      * @returns {THREE.Mesh} Orb mesh
      */
     async createOrb(position) {
+        let weatherData, airQualityData;
+
         try {
             // Get current location
             const location = await apiService.getCurrentLocation();
 
             // Fetch environmental data
-            const [weatherData, airQualityData] = await Promise.all([
+            [weatherData, airQualityData] = await Promise.all([
                 apiService.getWeather(location.lat, location.lon),
                 apiService.getAirQuality(location.lat, location.lon)
             ]);
+        } catch (error) {
+            console.warn('Failed to fetch environmental data, using fallback:', error);
 
-            // Map data to visual properties
-            const visualProps = this.mapDataToVisuals(weatherData, airQualityData);
-
-            // Create orb geometry
-            const geometry = new THREE.SphereGeometry(CONFIG.ar.orbScale, 32, 32);
-
-            // Create material with shader
-            const material = new THREE.ShaderMaterial({
-                vertexShader: this.liquidShaderMaterial.vertexShader,
-                fragmentShader: this.liquidShaderMaterial.fragmentShader,
-                uniforms: {
-                    time: { value: 0 },
-                    color1: { value: new THREE.Color(visualProps.color) },
-                    color2: { value: new THREE.Color(visualProps.color).offsetHSL(0, 0, 0.2) },
-                    morphFactor: { value: visualProps.morphFactor },
-                    spikiness: { value: visualProps.spikiness },
-                    opacity: { value: 0.85 }
-                },
-                transparent: true,
-                side: THREE.DoubleSide
-            });
-
-            // Create mesh
-            const orb = new THREE.Mesh(geometry, material);
-            orb.position.copy(position);
-
-            // Store metadata
-            orb.userData = {
-                type: 'orb',
-                weatherData,
-                airQualityData,
-                visualProps,
-                animationSpeed: visualProps.animationSpeed,
-                createdAt: Date.now()
+            // Use fallback mock data so orb always appears
+            weatherData = {
+                temperature: 20,
+                condition: 'clear',
+                description: 'Clear Sky'
             };
 
-            // Add to scene
-            if (this.scene) {
-                this.scene.add(orb);
-            }
-
-            this.orbs.push(orb);
-
-            // Limit number of orbs
-            if (this.orbs.length > CONFIG.performance.maxOrbs) {
-                this.removeOrb(this.orbs[0]);
-            }
-
-            return orb;
-        } catch (error) {
-            console.error('Failed to create orb:', error);
-            throw error;
+            airQualityData = {
+                aqiUS: 50  // Good air quality
+            };
         }
+
+        // Map data to visual properties
+        const visualProps = this.mapDataToVisuals(weatherData, airQualityData);
+
+        // Create orb geometry
+        const geometry = new THREE.SphereGeometry(CONFIG.ar.orbScale, 32, 32);
+
+        // Create material with shader
+        const material = new THREE.ShaderMaterial({
+            vertexShader: this.liquidShaderMaterial.vertexShader,
+            fragmentShader: this.liquidShaderMaterial.fragmentShader,
+            uniforms: {
+                time: { value: 0 },
+                color1: { value: new THREE.Color(visualProps.color) },
+                color2: { value: new THREE.Color(visualProps.color).offsetHSL(0, 0, 0.2) },
+                morphFactor: { value: visualProps.morphFactor },
+                spikiness: { value: visualProps.spikiness },
+                opacity: { value: 0.85 }
+            },
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        // Create mesh
+        const orb = new THREE.Mesh(geometry, material);
+        orb.position.copy(position);
+
+        // Store metadata
+        orb.userData = {
+            type: 'orb',
+            weatherData,
+            airQualityData,
+            visualProps,
+            animationSpeed: visualProps.animationSpeed,
+            createdAt: Date.now()
+        };
+
+        // Add to scene
+        if (this.scene) {
+            this.scene.add(orb);
+        }
+
+        this.orbs.push(orb);
+
+        // Limit number of orbs
+        if (this.orbs.length > CONFIG.performance.maxOrbs) {
+            this.removeOrb(this.orbs[0]);
+        }
+
+        return orb;
     }
 
     /**
