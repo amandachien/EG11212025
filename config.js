@@ -5,6 +5,7 @@ export const CONFIG = {
   // Netlify Function endpoints
   api: {
     plantIdentify: '/.netlify/functions/plant-identify',
+    plantNetIdentify: '/.netlify/functions/plantnet-identify', // Fallback
     weather: '/.netlify/functions/weather',
     airQuality: '/.netlify/functions/air-quality'
   },

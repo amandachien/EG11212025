@@ -49,7 +49,21 @@ class PlantDetector {
             const imageData = this.captureFrame(videoElement);
 
             // Send to Plant.id API via Netlify Function
-            const result = await apiService.identifyPlant(imageData);
+            let result;
+            let isFallback = false;
+
+            try {
+                result = await apiService.identifyPlant(imageData);
+            } catch (apiError) {
+                console.warn('Primary API failed, trying PlantNet fallback:', apiError);
+                try {
+                    result = await apiService.identifyPlantNet(imageData);
+                    isFallback = true;
+                } catch (fallbackError) {
+                    console.error('Fallback API also failed:', fallbackError);
+                    throw apiError; // Throw original error if both fail
+                }
+            }
 
             // Segment the plant if model is loaded
             if (this.segmentationModel) {
@@ -57,21 +71,44 @@ class PlantDetector {
             }
 
             // Store detected plant
-            if (result && result.suggestions && result.suggestions.length > 0) {
-                const plant = {
-                    id: Date.now(),
-                    name: result.suggestions[0].plant_name,
-                    commonNames: result.suggestions[0].plant_details?.common_names || [],
-                    scientificName: result.suggestions[0].plant_details?.scientific_name,
-                    probability: result.suggestions[0].probability,
-                    description: result.suggestions[0].plant_details?.wiki_description?.value,
-                    imageData: imageData,
-                    segmentation: this.currentPlantSegmentation,
-                    timestamp: Date.now()
-                };
+            if (isFallback) {
+                // Handle PlantNet response structure
+                if (result && result.results && result.results.length > 0) {
+                    const bestMatch = result.results[0];
+                    const plant = {
+                        id: Date.now(),
+                        name: bestMatch.species.commonNames[0] || bestMatch.species.scientificNameWithoutAuthor,
+                        commonNames: bestMatch.species.commonNames || [],
+                        scientificName: bestMatch.species.scientificNameWithoutAuthor,
+                        probability: bestMatch.score,
+                        description: 'Identified via PlantNet',
+                        imageData: imageData,
+                        segmentation: this.currentPlantSegmentation,
+                        timestamp: Date.now(),
+                        source: 'PlantNet'
+                    };
+                    this.detectedPlants.push(plant);
+                    return plant;
+                }
+            } else {
+                // Handle Plant.id response structure
+                if (result && result.suggestions && result.suggestions.length > 0) {
+                    const plant = {
+                        id: Date.now(),
+                        name: result.suggestions[0].plant_name,
+                        commonNames: result.suggestions[0].plant_details?.common_names || [],
+                        scientificName: result.suggestions[0].plant_details?.scientific_name,
+                        probability: result.suggestions[0].probability,
+                        description: result.suggestions[0].plant_details?.wiki_description?.value,
+                        imageData: imageData,
+                        segmentation: this.currentPlantSegmentation,
+                        timestamp: Date.now(),
+                        source: 'Plant.id'
+                    };
 
-                this.detectedPlants.push(plant);
-                return plant;
+                    this.detectedPlants.push(plant);
+                    return plant;
+                }
             }
 
             return null;

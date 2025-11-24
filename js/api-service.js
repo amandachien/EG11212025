@@ -37,6 +37,33 @@ class APIService {
     }
 
     /**
+     * Identify a plant using PlantNet (Fallback)
+     * @param {string} imageData - Base64 encoded image
+     * @returns {Promise<Object>} Plant identification results
+     */
+    async identifyPlantNet(imageData) {
+        try {
+            const response = await fetch(CONFIG.api.plantNetIdentify, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ imageData })
+            });
+
+            if (!response.ok) {
+                throw new Error(`PlantNet identification failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('PlantNet identification error:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Get weather data for a location
      * @param {number} lat - Latitude
      * @param {number} lon - Longitude
