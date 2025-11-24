@@ -128,21 +128,46 @@ class OrbCreator {
       uniform float opacity;
       
       void main() {
-        // Fresnel effect
+        // View direction
         vec3 viewDirection = normalize(cameraPosition - vPosition);
-        float fresnel = pow(1.0 - dot(viewDirection, vNormal), 3.0);
+        vec3 normal = normalize(vNormal);
+        
+        // Fresnel effect (stronger for metallic look)
+        float fresnel = pow(1.0 - dot(viewDirection, normal), 2.0);
+        
+        // Y3K Gradient Palette
+        vec3 silver = vec3(0.9, 0.9, 1.0);
+        vec3 neonPink = vec3(1.0, 0.0, 0.8);
+        vec3 electricBlue = vec3(0.0, 0.8, 1.0);
         
         // Animated color mixing
-        float mixFactor = sin(time + vPosition.y * 3.0) * 0.5 + 0.5;
-        vec3 color = mix(color1, color2, mixFactor);
+        float mixFactor = sin(time + vPosition.y * 2.0) * 0.5 + 0.5;
         
-        // Add fresnel glow
-        color += fresnel * 0.5;
+        // Base color: Mix between the data-driven color (color1) and Y3K silver
+        vec3 baseColor = mix(color1, silver, 0.6);
+        
+        // Secondary color: Mix with neon accents based on position
+        vec3 accentColor = mix(neonPink, electricBlue, sin(vPosition.x * 4.0 + time) * 0.5 + 0.5);
+        
+        // Combine base and accent
+        vec3 finalColor = mix(baseColor, accentColor, fresnel * 0.5);
+        
+        // Pseudo-Environment Reflection (Metallic look)
+        vec3 ref = reflect(-viewDirection, normal);
+        float reflection = dot(ref, vec3(0.0, 1.0, 0.0)) * 0.5 + 0.5; // Fake sky reflection
+        
+        // Add strong specular highlight
+        float specular = pow(max(dot(ref, vec3(0.5, 0.7, 0.5)), 0.0), 30.0);
+        
+        // Compose final look
+        finalColor += reflection * 0.3 * silver; // Add reflection
+        finalColor += specular * 0.8; // Add specular highlight
+        finalColor += fresnel * 0.4 * electricBlue; // Add rim glow
         
         // Pulsing effect
-        float pulse = sin(time * 2.0) * 0.1 + 0.9;
+        float pulse = sin(time * 2.0) * 0.05 + 0.95;
         
-        gl_FragColor = vec4(color * pulse, opacity);
+        gl_FragColor = vec4(finalColor * pulse, opacity);
       }
     `;
 
