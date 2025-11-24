@@ -196,6 +196,19 @@ class HandTracking {
      * Check if hand is a fist (all fingers closed)
      */
     isFist(landmarks) {
+        // EXCLUSION: If thumb and index are close, it's likely a pinch (or near pinch), not a fist
+        const thumbTip = landmarks[4];
+        const indexTip = landmarks[8];
+        const pinchDist = Math.sqrt(
+            Math.pow(thumbTip.x - indexTip.x, 2) +
+            Math.pow(thumbTip.y - indexTip.y, 2) +
+            Math.pow(thumbTip.z - indexTip.z, 2)
+        );
+
+        if (pinchDist < CONFIG.gestures.fistPinchExclusion) {
+            return false;
+        }
+
         // Check if all fingertips are below their respective PIP joints
         const fingers = [
             { tip: 8, pip: 6 },   // Index
@@ -217,7 +230,7 @@ class HandTracking {
         }
 
         // Thumb is tricky, check if it's close to the palm/index base
-        const thumbTip = landmarks[4];
+        // thumbTip is already defined above
         const indexMCP = landmarks[5]; // Index base
         const thumbClosed = Math.abs(thumbTip.x - indexMCP.x) < 0.1;
 
