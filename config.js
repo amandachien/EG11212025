@@ -61,7 +61,7 @@ export const CONFIG = {
   ar: {
     orbDistance: 0.5,          // meters from camera
     pendantDistance: 0.4,      // meters from camera
-    orbScale: 0.15,            // meters
+    orbScale: 0.015,            // meters
     pendantScale: 0.1          // meters
   }
 };

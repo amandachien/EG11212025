@@ -14,10 +14,12 @@ class HandTracking {
         this.lastGestureTime = 0;
         this.gestureCallbacks = {
             pinch: [],
-            openHand: []
+            openHand: [],
+            fist: []
         };
         this.currentGesture = null;
         this.handLandmarks = null;
+        this.animationFrameId = null;
     }
 
     /**
@@ -55,22 +57,11 @@ class HandTracking {
 
             this.hands.onResults((results) => this.onResults(results));
 
-            // Initialize camera
-            if (typeof window.Camera === 'undefined') {
-                throw new Error('MediaPipe Camera library not loaded. Please check CDN links.');
-            }
+            this.hands.onResults((results) => this.onResults(results));
 
-            this.camera = new window.Camera(this.videoElement, {
-                onFrame: async () => {
-                    if (this.hands) {
-                        await this.hands.send({ image: this.videoElement });
-                    }
-                },
-                width: 1280,
-                height: 720
-            });
+            // Start processing frames
+            this.startProcessing();
 
-            await this.camera.start();
             this.isInitialized = true;
             console.log('Hand tracking initialized');
             return true;
@@ -78,6 +69,19 @@ class HandTracking {
             console.error('Hand tracking initialization failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * Start processing video frames
+     */
+    startProcessing() {
+        const processFrame = async () => {
+            if (this.videoElement && this.hands && !this.videoElement.paused && !this.videoElement.ended) {
+                await this.hands.send({ image: this.videoElement });
+            }
+            this.animationFrameId = requestAnimationFrame(processFrame);
+        };
+        processFrame();
     }
 
     /**
@@ -126,6 +130,11 @@ class HandTracking {
         // Detect open hand (all fingers extended)
         if (this.isOpenHand(landmarks)) {
             return 'openHand';
+        }
+
+        // Detect fist (all fingers closed)
+        if (this.isFist(landmarks)) {
+            return 'fist';
         }
 
         return null;
@@ -181,6 +190,42 @@ class HandTracking {
         }
 
         return extendedCount >= 4; // At least 4 fingers extended
+    }
+
+    /**
+     * Check if hand is a fist (all fingers closed)
+     */
+    isFist(landmarks) {
+        // Check if all fingertips are below their respective PIP joints
+        const fingers = [
+            { tip: 8, pip: 6 },   // Index
+            { tip: 12, pip: 10 }, // Middle
+            { tip: 16, pip: 14 }, // Ring
+            { tip: 20, pip: 18 }  // Pinky
+        ];
+
+        let closedCount = 0;
+
+        for (const finger of fingers) {
+            const tip = landmarks[finger.tip];
+            const pip = landmarks[finger.pip];
+
+            // Check if tip is below pip (y is inverted in screen coordinates, so tip.y > pip.y means lower)
+            if (tip.y > pip.y) {
+                closedCount++;
+            }
+        }
+
+        // Thumb is tricky, check if it's close to the palm/index base
+        const thumbTip = landmarks[4];
+        const indexMCP = landmarks[5]; // Index base
+        const thumbClosed = Math.abs(thumbTip.x - indexMCP.x) < 0.1;
+
+        if (thumbClosed) {
+            closedCount++;
+        }
+
+        return closedCount >= 4; // At least 4 fingers closed
     }
 
     /**
@@ -277,8 +322,9 @@ class HandTracking {
      * Stop hand tracking
      */
     stop() {
-        if (this.camera) {
-            this.camera.stop();
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
         }
         this.isInitialized = false;
     }

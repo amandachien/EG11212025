@@ -150,6 +150,7 @@ class ARPlantGame {
             // Register gesture callbacks
             handTracking.on('pinch', (position) => this.onPinchGesture(position));
             handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
+            handTracking.on('fist', () => this.onFistGesture());
 
             this.isRunning = true;
             this.hideLoading();
@@ -313,6 +314,24 @@ class ARPlantGame {
         } catch (error) {
             console.error('Failed to create pendant from gesture:', error);
         }
+    }
+
+    /**
+     * Handle fist gesture (Restart/Clear)
+     */
+    onFistGesture() {
+        console.log('Fist gesture detected - Clearing orbs');
+        orbCreator.clearAllOrbs();
+        this.updateStatus('Orbs cleared');
+
+        // Reset env data display
+        this.ui.tempValue.textContent = '--°C';
+        this.ui.weatherValue.textContent = '--';
+        this.ui.aqiValue.textContent = '--';
+
+        setTimeout(() => {
+            this.updateStatus('AR Active');
+        }, 2000);
     }
 
     /**

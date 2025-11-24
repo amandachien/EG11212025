@@ -345,6 +345,8 @@ html, body {
   padding: var(--spacing-sm);
   z-index: var(--z-panel);
   min-width: 200px;
+  transform: scale(0.5);
+  transform-origin: top right;
   animation: slideLeft 0.3s ease;
 }
 
