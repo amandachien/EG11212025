@@ -150,7 +150,6 @@ class ARPlantGame {
             // Register gesture callbacks
             handTracking.on('pinch', (position) => this.onPinchGesture(position));
             handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
-            handTracking.on('fist', () => this.onFistGesture());
 
             this.isRunning = true;
             this.hideLoading();
@@ -316,24 +315,6 @@ class ARPlantGame {
         }
     }
 
-    /**
-     * Handle fist gesture (Clear All Objects)
-     */
-    async onFistGesture() {
-        console.log('Fist gesture detected: Clearing all objects');
-
-        // Clear all AR objects
-        orbCreator.clearAllOrbs();
-        pendantCreator.clearAll();
-
-        // Update status
-        this.updateStatus('Cleared Objects');
-
-        // Show brief notification
-        setTimeout(() => {
-            this.updateStatus('AR Active');
-        }, 2000);
-    }
 
     /**
      * Convert hand position to AR space
