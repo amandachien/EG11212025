@@ -369,15 +369,15 @@ class OrbCreator {
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // Smaller radius to keep orbs closer to wrist and visible
-        const radius = 0.04; // Reduced from 0.08 to keep objects closer
+        // Larger radius to fit around hand palm instead of wrist
+        const radius = 0.10; // Increased to fit around hand
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
-            // Use tighter semi-circle arc (120 degrees) centered in front of wrist
-            // Start from -60 degrees to +60 degrees for better visibility
-            const startAngle = -Math.PI / 3; // -60 degrees
-            const endAngle = Math.PI / 3;    // +60 degrees
+            // Use wider semi-circle arc (180 degrees) around hand
+            // Start from -90 degrees (left) to +90 degrees (right)
+            const startAngle = -Math.PI / 2; // -90 degrees
+            const endAngle = Math.PI / 2;    // +90 degrees
             const angleRange = endAngle - startAngle;
 
             // Calculate angle for this orb within the arc
@@ -387,17 +387,17 @@ class OrbCreator {
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 
-            // Convert wrist position to AR space (normalized to world coordinates)
-            // Wrist position is in normalized screen coordinates (0-1)
-            const wristX = (this.wristPosition.x - 0.5) * 2;
-            const wristY = -(this.wristPosition.y - 0.5) * 2;
-            const wristZ = this.wristPosition.z || -0.5;
+            // Convert hand center position to AR space (normalized to world coordinates)
+            // Hand position is in normalized screen coordinates (0-1)
+            const handX = (this.wristPosition.x - 0.5) * 2;
+            const handY = -(this.wristPosition.y - 0.5) * 2;
+            const handZ = this.wristPosition.z || -0.5;
 
-            // Set orb position with slight Z offset to keep in view
+            // Set orb position around hand
             orb.position.set(
-                wristX + offsetX,
-                wristY + offsetY,
-                wristZ + 0.02 // Slight forward offset to keep in camera view
+                handX + offsetX,
+                handY + offsetY,
+                handZ
             );
         });
     }

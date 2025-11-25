@@ -325,18 +325,30 @@ class HandTracking {
     }
 
     /**
-     * Get wrist landmarks for tracking
-     * @returns {Object|null} Wrist position and orientation data
+     * Get hand center landmarks (palm area) for bracelet positioning
      */
     getWristLandmarks() {
         if (!this.handLandmarks) return null;
 
+        // Use palm center instead of wrist for better visibility
+        // Calculate center point between wrist and middle finger base
         const wrist = this.handLandmarks[0];
         const indexMCP = this.handLandmarks[5];
+        const middleMCP = this.handLandmarks[9];
+        const ringMCP = this.handLandmarks[13];
         const pinkyMCP = this.handLandmarks[17];
 
+        // Calculate palm center (average of finger bases)
+        const palmCenterX = (indexMCP.x + middleMCP.x + ringMCP.x + pinkyMCP.x) / 4;
+        const palmCenterY = (indexMCP.y + middleMCP.y + ringMCP.y + pinkyMCP.y) / 4;
+        const palmCenterZ = (indexMCP.z + middleMCP.z + ringMCP.z + pinkyMCP.z) / 4;
+
         return {
-            position: wrist,
+            position: {
+                x: palmCenterX,
+                y: palmCenterY,
+                z: palmCenterZ
+            },
             indexMCP: indexMCP,
             pinkyMCP: pinkyMCP
         };

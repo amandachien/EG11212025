@@ -336,22 +336,22 @@ class PendantCreator {
     }
 
     /**
-     * Update wrist-attached pendant position
+     * Update hand-attached pendant position
      * @param {THREE.Group} pendant - Pendant to update
      */
     updateWristPendantPosition(pendant) {
-        // Get wrist position from orb creator (imported at top of file)
+        // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Smaller radius to match orbs - keep objects closer and visible
-        const radius = 0.04; // Reduced from 0.08
+        // Larger radius to match orbs - fit around hand palm
+        const radius = 0.10; // Increased to fit around hand
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
-        // Use tighter semi-circle arc (120 degrees) - same as orbs
-        const startAngle = -Math.PI / 3; // -60 degrees
-        const endAngle = Math.PI / 3;    // +60 degrees
+        // Use wider semi-circle arc (180 degrees) - same as orbs
+        const startAngle = -Math.PI / 2; // -90 degrees
+        const endAngle = Math.PI / 2;    // +90 degrees
         const angleRange = endAngle - startAngle;
 
         // Calculate angle for this pendant within the arc
@@ -361,16 +361,16 @@ class PendantCreator {
         const offsetX = radius * Math.cos(angle);
         const offsetY = radius * Math.sin(angle);
 
-        // Convert wrist position to AR space
-        const wristX = (orbCreator.wristPosition.x - 0.5) * 2;
-        const wristY = -(orbCreator.wristPosition.y - 0.5) * 2;
-        const wristZ = orbCreator.wristPosition.z || -0.5;
+        // Convert hand center position to AR space
+        const handX = (orbCreator.wristPosition.x - 0.5) * 2;
+        const handY = -(orbCreator.wristPosition.y - 0.5) * 2;
+        const handZ = orbCreator.wristPosition.z || -0.5;
 
-        // Set pendant position with slight Z offset
+        // Set pendant position around hand
         pendant.position.set(
-            wristX + offsetX,
-            wristY + offsetY,
-            wristZ + 0.02 // Slight forward offset to keep in camera view
+            handX + offsetX,
+            handY + offsetY,
+            handZ
         );
     }
 
