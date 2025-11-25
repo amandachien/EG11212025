@@ -364,35 +364,33 @@ class OrbCreator {
     }
 
     /**
-     * Update positions of hand-attached orbs in circular pattern
+     * Update positions of hand-attached orbs in circular orbit
      */
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // Small radius for bracelet
-        const radius = 0.05; // Slightly larger for visibility
+        // Orbit radius - visible distance from palm center
+        const orbitRadius = 0.15; // Larger radius for clear visibility
         const numOrbs = this.wristOrbs.length;
 
+        // Animate orbit rotation over time
+        const time = Date.now() * 0.0005; // Slow rotation
+
         this.wristOrbs.forEach((orb, index) => {
-            // Use compact arc around hand
-            const startAngle = -Math.PI * 0.5; // -90 degrees
-            const endAngle = Math.PI * 0.5;    // +90 degrees
-            const angleRange = endAngle - startAngle;
+            // Distribute orbs evenly in a circle
+            const angleOffset = (2 * Math.PI * index) / numOrbs;
+            const angle = time + angleOffset;
 
-            // Calculate angle for this orb within the arc
-            const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
+            // Calculate orbit position (circular motion in XY plane)
+            const offsetX = orbitRadius * Math.cos(angle);
+            const offsetY = orbitRadius * Math.sin(angle);
 
-            // Calculate offset in AR space
-            const offsetX = radius * Math.cos(angle);
-            const offsetY = radius * Math.sin(angle);
-
-            // Convert hand position to AR space (same as pinch gesture)
-            // This matches how orbs are created in onPinchGesture
+            // Convert hand position to AR space
             const baseX = (this.wristPosition.x - 0.5) * 2;
             const baseY = -(this.wristPosition.y - 0.5) * 2;
             const baseZ = -(this.wristPosition.z || 0.5);
 
-            // Set orb position with offset
+            // Set orb position - orbiting around palm center
             orb.position.set(
                 baseX + offsetX,
                 baseY + offsetY,

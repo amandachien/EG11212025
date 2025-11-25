@@ -370,10 +370,10 @@ class ARPlantGame {
             pendantCreator.attachPendantsToWrist(allPendants, allOrbs.length);
         }
 
-        // Create connections between all objects in the bracelet
+        // Create connections between all objects in the orbit
         pendantCreator.createBraceletConnections(allObjects);
 
-        this.updateStatus('Bracelet formed on wrist');
+        this.updateStatus('Objects orbiting hand');
         setTimeout(() => this.updateStatus('AR Active'), 2000);
     }
 
