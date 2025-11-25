@@ -257,11 +257,11 @@ class PendantCreator {
     /**
      * Create animated connection line between pendant and orb
      */
-    createConnection(pendant, orb) {
+    createConnection(obj1, obj2) {
         // Create line geometry
         const points = [
-            pendant.position.clone(),
-            orb.position.clone()
+            obj1.position.clone(),
+            obj2.position.clone()
         ];
 
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -280,11 +280,13 @@ class PendantCreator {
         const line = new THREE.Line(geometry, material);
         line.computeLineDistances();
 
-        // Store metadata for animation
+        // Store metadata for animation (support both pendant-orb and bracelet connections)
         line.userData = {
             type: 'connection',
-            pendant: pendant,
-            orb: orb,
+            pendant: obj1.userData?.type === 'pendant' ? obj1 : obj2.userData?.type === 'pendant' ? obj2 : null,
+            orb: obj1.userData?.type === 'orb' ? obj1 : obj2.userData?.type === 'orb' ? obj2 : null,
+            obj1: obj1,
+            obj2: obj2,
             phase: Math.random() * Math.PI * 2
         };
 
@@ -297,6 +299,11 @@ class PendantCreator {
     update(deltaTime) {
         // Update pendant rotations and Y3K frame animations
         this.pendants.forEach(pendant => {
+            // Update wrist-attached pendant positions
+            if (pendant.userData.attachedToWrist && pendant.userData.wristIndex !== undefined) {
+                this.updateWristPendantPosition(pendant);
+            }
+
             pendant.rotation.y += deltaTime * 0.5;
 
             // Update Y3K frame shader time
@@ -310,17 +317,55 @@ class PendantCreator {
         // Update connections
         this.connections.forEach(connection => {
             // Update line positions
-            const points = [
-                connection.userData.pendant.position.clone(),
-                connection.userData.orb.position.clone()
-            ];
-            connection.geometry.setFromPoints(points);
-            connection.computeLineDistances();
+            const obj1 = connection.userData.pendant || connection.userData.obj1;
+            const obj2 = connection.userData.orb || connection.userData.obj2;
 
-            // Animate opacity
-            const phase = connection.userData.phase + Date.now() * 0.002;
-            connection.material.opacity = 0.3 + Math.sin(phase) * 0.3;
+            if (obj1 && obj2) {
+                const points = [
+                    obj1.position.clone(),
+                    obj2.position.clone()
+                ];
+                connection.geometry.setFromPoints(points);
+                connection.computeLineDistances();
+
+                // Animate opacity
+                const phase = connection.userData.phase + Date.now() * 0.002;
+                connection.material.opacity = 0.3 + Math.sin(phase) * 0.3;
+            }
         });
+    }
+
+    /**
+     * Update wrist-attached pendant position
+     * @param {THREE.Group} pendant - Pendant to update
+     */
+    updateWristPendantPosition(pendant) {
+        // Get wrist position from orb creator (imported at top of file)
+        if (!orbCreator.wristPosition) return;
+
+        const radius = 0.08; // Same radius as orbs
+        const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
+            orbCreator.wristOrbs.length;
+        const index = pendant.userData.wristIndex;
+
+        // Calculate angle for this pendant
+        const angle = (2 * Math.PI * index) / totalObjects;
+
+        // Calculate position in circle
+        const offsetX = radius * Math.cos(angle);
+        const offsetY = radius * Math.sin(angle);
+
+        // Convert wrist position to AR space
+        const wristX = (orbCreator.wristPosition.x - 0.5) * 2;
+        const wristY = -(orbCreator.wristPosition.y - 0.5) * 2;
+        const wristZ = orbCreator.wristPosition.z || -0.5;
+
+        // Set pendant position
+        pendant.position.set(
+            wristX + offsetX,
+            wristY + offsetY,
+            wristZ
+        );
     }
 
     /**
@@ -372,9 +417,78 @@ class PendantCreator {
      * Clear all pendants and connections
      */
     clearAll() {
-        this.pendants.forEach(pendant => this.removePendant(pendant));
-        this.pendants = [];
+        // Remove all connections first
+        this.connections.forEach(connection => {
+            if (this.scene && connection.parent === this.scene) {
+                this.scene.remove(connection);
+            }
+            if (connection.geometry) connection.geometry.dispose();
+            if (connection.material) connection.material.dispose();
+        });
         this.connections = [];
+
+        // Remove all pendants
+        [...this.pendants].forEach(pendant => {
+            if (this.scene && pendant.parent === this.scene) {
+                this.scene.remove(pendant);
+            }
+            // Dispose resources
+            pendant.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (child.material.map) child.material.map.dispose();
+                    if (child.material.alphaMap) child.material.alphaMap.dispose();
+                    child.material.dispose();
+                }
+            });
+        });
+        this.pendants = [];
+
+        console.log('Cleared all pendants and connections');
+    }
+
+    /**
+     * Attach pendants to wrist in circular pattern
+     * @param {Array} pendants - Pendants to attach
+     * @param {number} orbCount - Number of orbs already on wrist (for offset)
+     */
+    attachPendantsToWrist(pendants, orbCount = 0) {
+        pendants.forEach(pendant => {
+            pendant.userData.attachedToWrist = true;
+            pendant.userData.wristIndex = orbCount + pendants.indexOf(pendant);
+        });
+        console.log(`Attached ${pendants.length} pendants to wrist`);
+    }
+
+    /**
+     * Create connections between all objects in bracelet
+     * @param {Array} objects - All objects (orbs and pendants) in bracelet
+     */
+    createBraceletConnections(objects) {
+        // Clear existing connections
+        this.connections.forEach(connection => {
+            if (this.scene && connection.parent === this.scene) {
+                this.scene.remove(connection);
+            }
+            if (connection.geometry) connection.geometry.dispose();
+            if (connection.material) connection.material.dispose();
+        });
+        this.connections = [];
+
+        // Create connections between adjacent objects in the bracelet
+        for (let i = 0; i < objects.length; i++) {
+            const current = objects[i];
+            const next = objects[(i + 1) % objects.length]; // Wrap around to first
+
+            const connection = this.createConnection(current, next);
+            this.connections.push(connection);
+
+            if (this.scene) {
+                this.scene.add(connection);
+            }
+        }
+
+        console.log(`Created ${this.connections.length} bracelet connections`);
     }
 }
 

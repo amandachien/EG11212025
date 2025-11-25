@@ -327,26 +327,54 @@ class ARPlantGame {
         console.log('Open hand gesture detected');
 
         const plant = plantDetector.getLatestPlant();
-        if (!plant) {
-            console.log('No plant detected yet, attaching orbs to wrist instead');
-            // Attach existing orbs to wrist
-            const allOrbs = orbCreator.getAllOrbs();
-            if (allOrbs.length > 0) {
-                orbCreator.attachOrbsToWrist(allOrbs);
-                this.updateStatus('Orbs attached to wrist');
-                setTimeout(() => this.updateStatus('AR Active'), 2000);
+
+        // If plant detected, create pendant
+        if (plant) {
+            const position = this.handPositionToARSpace(handPosition);
+            try {
+                await pendantCreator.createPendant(position);
+                // After creating pendant, attach all objects to wrist
+                this.attachAllObjectsToWrist();
+            } catch (error) {
+                console.error('Failed to create pendant from gesture:', error);
             }
+        } else {
+            // No plant detected - attach existing objects to wrist
+            console.log('No plant detected, forming wrist bracelet with existing objects');
+            this.attachAllObjectsToWrist();
+        }
+    }
+
+    /**
+     * Attach all AR objects (orbs and pendants) to wrist in bracelet formation
+     */
+    attachAllObjectsToWrist() {
+        const allOrbs = orbCreator.getAllOrbs();
+        const allPendants = pendantCreator.getAllPendants();
+
+        if (allOrbs.length === 0 && allPendants.length === 0) {
+            console.log('No objects to attach to wrist');
             return;
         }
 
-        // Convert hand position to AR space
-        const position = this.handPositionToARSpace(handPosition);
+        // Combine orbs and pendants for bracelet formation
+        const allObjects = [...allOrbs, ...allPendants];
 
-        try {
-            await pendantCreator.createPendant(position);
-        } catch (error) {
-            console.error('Failed to create pendant from gesture:', error);
+        // Attach orbs to wrist (this will position them in a circle)
+        if (allOrbs.length > 0) {
+            orbCreator.attachOrbsToWrist(allOrbs);
         }
+
+        // Attach pendants to wrist with same circular pattern
+        if (allPendants.length > 0) {
+            pendantCreator.attachPendantsToWrist(allPendants, allOrbs.length);
+        }
+
+        // Create connections between all objects in the bracelet
+        pendantCreator.createBraceletConnections(allObjects);
+
+        this.updateStatus('Bracelet formed on wrist');
+        setTimeout(() => this.updateStatus('AR Active'), 2000);
     }
 
     /**
