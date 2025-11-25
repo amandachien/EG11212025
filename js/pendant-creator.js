@@ -366,11 +366,11 @@ class PendantCreator {
         const baseZ = -(orbCreator.wristPosition.z || 0.5);
 
         // Set pendant position - orbiting around palm center
-        // Add Z-offset to bring orbit in FRONT of hand
+        // Subtract Z-offset to bring orbit CLOSER to camera
         pendant.position.set(
             baseX + offsetX,
             baseY + offsetY,
-            baseZ + 0.2 // Move forward toward camera
+            baseZ - 0.2 // Move closer to camera (negative Z)
         );
     }
 
