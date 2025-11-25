@@ -343,15 +343,15 @@ class PendantCreator {
         // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Larger radius to match orbs - fit around hand palm
-        const radius = 0.10; // Increased to fit around hand
+        // Much smaller radius to match orbs - keep close to palm
+        const radius = 0.03; // Small radius to stay close to palm
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
-        // Use wider semi-circle arc (180 degrees) - same as orbs
-        const startAngle = -Math.PI / 2; // -90 degrees
-        const endAngle = Math.PI / 2;    // +90 degrees
+        // Use compact semi-circle arc (140 degrees) - same as orbs
+        const startAngle = -Math.PI * 0.39; // -70 degrees
+        const endAngle = Math.PI * 0.39;    // +70 degrees
         const angleRange = endAngle - startAngle;
 
         // Calculate angle for this pendant within the arc
@@ -366,7 +366,7 @@ class PendantCreator {
         const handY = -(orbCreator.wristPosition.y - 0.5) * 2;
         const handZ = orbCreator.wristPosition.z || -0.5;
 
-        // Set pendant position around hand
+        // Set pendant position around hand - very close to palm
         pendant.position.set(
             handX + offsetX,
             handY + offsetY,

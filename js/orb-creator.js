@@ -364,20 +364,19 @@ class OrbCreator {
     }
 
     /**
-     * Update positions of wrist-attached orbs in circular pattern
+     * Update positions of hand-attached orbs in circular pattern
      */
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // Larger radius to fit around hand palm instead of wrist
-        const radius = 0.10; // Increased to fit around hand
+        // Much smaller radius to keep orbs close to hand and visible
+        const radius = 0.03; // Small radius to stay close to palm
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
-            // Use wider semi-circle arc (180 degrees) around hand
-            // Start from -90 degrees (left) to +90 degrees (right)
-            const startAngle = -Math.PI / 2; // -90 degrees
-            const endAngle = Math.PI / 2;    // +90 degrees
+            // Use compact semi-circle arc (140 degrees) around hand
+            const startAngle = -Math.PI * 0.39; // -70 degrees
+            const endAngle = Math.PI * 0.39;    // +70 degrees
             const angleRange = endAngle - startAngle;
 
             // Calculate angle for this orb within the arc
@@ -393,7 +392,7 @@ class OrbCreator {
             const handY = -(this.wristPosition.y - 0.5) * 2;
             const handZ = this.wristPosition.z || -0.5;
 
-            // Set orb position around hand
+            // Set orb position around hand - very close to palm
             orb.position.set(
                 handX + offsetX,
                 handY + offsetY,
