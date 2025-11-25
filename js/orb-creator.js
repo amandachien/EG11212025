@@ -391,10 +391,11 @@ class OrbCreator {
             const baseZ = -(this.wristPosition.z || 0.5);
 
             // Set orb position - orbiting around palm center
+            // Add Z-offset to bring orbit in FRONT of hand
             orb.position.set(
                 baseX + offsetX,
                 baseY + offsetY,
-                baseZ
+                baseZ + 0.2 // Move forward toward camera
             );
         });
     }

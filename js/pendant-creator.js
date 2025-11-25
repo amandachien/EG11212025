@@ -360,16 +360,17 @@ class PendantCreator {
         const offsetX = orbitRadius * Math.cos(angle);
         const offsetY = orbitRadius * Math.sin(angle);
 
-        // Convert hand position to AR space (same as pinch gesture)
+        // Convert hand position to AR space
         const baseX = (orbCreator.wristPosition.x - 0.5) * 2;
         const baseY = -(orbCreator.wristPosition.y - 0.5) * 2;
         const baseZ = -(orbCreator.wristPosition.z || 0.5);
 
         // Set pendant position - orbiting around palm center
+        // Add Z-offset to bring orbit in FRONT of hand
         pendant.position.set(
             baseX + offsetX,
             baseY + offsetY,
-            baseZ
+            baseZ + 0.2 // Move forward toward camera
         );
     }
 
