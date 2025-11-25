@@ -369,8 +369,8 @@ class OrbCreator {
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // TEST: Use zero radius to see if objects appear at hand center
-        const radius = 0.0; // Zero radius - all objects at hand center
+        // Small radius for bracelet
+        const radius = 0.02; // Small but visible radius
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
@@ -382,20 +382,21 @@ class OrbCreator {
             // Calculate angle for this orb within the arc
             const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
 
-            // Calculate offset (will be zero for now)
+            // Calculate offset
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 
-            // Use hand position directly in normalized coordinates (0-1 range)
+            // Use hand position DIRECTLY without any transformation
+            // MediaPipe gives us normalized coordinates that work in AR space
             const handX = this.wristPosition.x;
             const handY = this.wristPosition.y;
-            const handZ = this.wristPosition.z || 0.5;
+            const handZ = -(this.wristPosition.z || 0.5); // Only flip Z
 
-            // Set orb position - directly at hand center for testing
+            // Set orb position - use coordinates directly
             orb.position.set(
-                handX + offsetX - 0.5, // Center around 0
-                -(handY + offsetY - 0.5), // Flip Y and center
-                -handZ // Negative Z for camera facing
+                handX + offsetX,
+                handY + offsetY,
+                handZ
             );
         });
     }
