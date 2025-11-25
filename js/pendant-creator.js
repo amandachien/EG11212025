@@ -343,13 +343,13 @@ class PendantCreator {
         // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Much smaller radius to match orbs - keep close to palm
-        const radius = 0.03; // Small radius to stay close to palm
+        // Very small radius to match orbs
+        const radius = 0.015; // Even smaller radius
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
-        // Use compact semi-circle arc (140 degrees) - same as orbs
+        // Use compact arc - same as orbs
         const startAngle = -Math.PI * 0.39; // -70 degrees
         const endAngle = Math.PI * 0.39;    // +70 degrees
         const angleRange = endAngle - startAngle;
@@ -357,20 +357,20 @@ class PendantCreator {
         // Calculate angle for this pendant within the arc
         const angle = startAngle + (angleRange * index) / Math.max(totalObjects - 1, 1);
 
-        // Calculate position in arc
+        // Calculate offset in normalized space
         const offsetX = radius * Math.cos(angle);
         const offsetY = radius * Math.sin(angle);
 
-        // Convert hand center position to AR space
-        const handX = (orbCreator.wristPosition.x - 0.5) * 2;
-        const handY = -(orbCreator.wristPosition.y - 0.5) * 2;
-        const handZ = orbCreator.wristPosition.z || -0.5;
+        // Use hand position directly in normalized coordinates
+        const handX = orbCreator.wristPosition.x;
+        const handY = orbCreator.wristPosition.y;
+        const handZ = orbCreator.wristPosition.z || 0.5;
 
-        // Set pendant position around hand - very close to palm
+        // Set pendant position in normalized screen coordinates
         pendant.position.set(
-            handX + offsetX,
-            handY + offsetY,
-            handZ
+            handX + offsetX - 0.5, // Center around 0
+            -(handY + offsetY - 0.5), // Flip Y and center
+            -handZ // Negative Z for camera facing
         );
     }
 

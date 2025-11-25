@@ -369,12 +369,12 @@ class OrbCreator {
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // Much smaller radius to keep orbs close to hand and visible
-        const radius = 0.03; // Small radius to stay close to palm
+        // Very small radius to keep orbs close to hand
+        const radius = 0.015; // Even smaller radius
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
-            // Use compact semi-circle arc (140 degrees) around hand
+            // Use compact arc around hand
             const startAngle = -Math.PI * 0.39; // -70 degrees
             const endAngle = Math.PI * 0.39;    // +70 degrees
             const angleRange = endAngle - startAngle;
@@ -382,21 +382,21 @@ class OrbCreator {
             // Calculate angle for this orb within the arc
             const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
 
-            // Calculate position in arc (X is horizontal, Y is vertical in camera space)
+            // Calculate offset in normalized space (much smaller scale)
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 
-            // Convert hand center position to AR space (normalized to world coordinates)
-            // Hand position is in normalized screen coordinates (0-1)
-            const handX = (this.wristPosition.x - 0.5) * 2;
-            const handY = -(this.wristPosition.y - 0.5) * 2;
-            const handZ = this.wristPosition.z || -0.5;
+            // Use hand position directly in normalized coordinates (0-1 range)
+            // Don't scale to AR space - keep in screen space
+            const handX = this.wristPosition.x;
+            const handY = this.wristPosition.y;
+            const handZ = this.wristPosition.z || 0.5;
 
-            // Set orb position around hand - very close to palm
+            // Set orb position in normalized screen coordinates
             orb.position.set(
-                handX + offsetX,
-                handY + offsetY,
-                handZ
+                handX + offsetX - 0.5, // Center around 0
+                -(handY + offsetY - 0.5), // Flip Y and center
+                -handZ // Negative Z for camera facing
             );
         });
     }
