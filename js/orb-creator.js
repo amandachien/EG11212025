@@ -373,10 +373,16 @@ class OrbCreator {
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
-            // Calculate angle for this orb
-            const angle = (2 * Math.PI * index) / numOrbs;
+            // Use semi-circle arc (180 degrees) in front of wrist to keep objects visible
+            // Start from -90 degrees (left) to +90 degrees (right)
+            const startAngle = -Math.PI / 2; // -90 degrees
+            const endAngle = Math.PI / 2;    // +90 degrees
+            const angleRange = endAngle - startAngle;
 
-            // Calculate position in circle
+            // Calculate angle for this orb within the arc
+            const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
+
+            // Calculate position in arc (X is horizontal, Y is vertical in camera space)
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 

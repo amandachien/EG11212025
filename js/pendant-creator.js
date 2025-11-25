@@ -348,10 +348,15 @@ class PendantCreator {
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
-        // Calculate angle for this pendant
-        const angle = (2 * Math.PI * index) / totalObjects;
+        // Use semi-circle arc (180 degrees) in front of wrist - same as orbs
+        const startAngle = -Math.PI / 2; // -90 degrees
+        const endAngle = Math.PI / 2;    // +90 degrees
+        const angleRange = endAngle - startAngle;
 
-        // Calculate position in circle
+        // Calculate angle for this pendant within the arc
+        const angle = startAngle + (angleRange * index) / Math.max(totalObjects - 1, 1);
+
+        // Calculate position in arc
         const offsetX = radius * Math.cos(angle);
         const offsetY = radius * Math.sin(angle);
 
