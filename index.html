@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
     rel="stylesheet">
 
   <!-- Styles -->
@@ -76,7 +76,11 @@
         </div>
         <div class="instruction-item">
           <span class="instruction-icon">✋</span>
-          <p><strong>Open hand</strong> to create plant pendant</p>
+          <p><strong>Open hand</strong> to attach orbs to wrist or create pendant</p>
+        </div>
+        <div class="instruction-item">
+          <span class="instruction-icon">✌️</span>
+          <p><strong>Peace sign</strong> to clear all AR objects</p>
         </div>
         <button class="btn-primary" id="start-btn">Start AR Experience</button>
       </div>
@@ -121,19 +125,13 @@
     <!-- Controls -->
     <div class="controls-panel" id="controls-panel">
       <button class="control-btn" id="detect-plant-btn" title="Detect Plant">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v20M2 12h20" />
-        </svg>
+        <span class="material-symbols-outlined">photo_camera</span>
       </button>
       <button class="control-btn" id="create-orb-btn" title="Create Orb">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-        </svg>
+        <span class="material-symbols-outlined">bubble_chart</span>
       </button>
       <button class="control-btn" id="create-pendant-btn" title="Create Pendant" disabled>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-        </svg>
+        <span class="material-symbols-outlined">diamond</span>
       </button>
     </div>
 

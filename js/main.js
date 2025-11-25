@@ -150,6 +150,7 @@ class ARPlantGame {
             // Register gesture callbacks
             handTracking.on('pinch', (position) => this.onPinchGesture(position));
             handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
+            handTracking.on('peace', (position) => this.onPeaceGesture(position));
 
             this.isRunning = true;
             this.hideLoading();
@@ -313,7 +314,14 @@ class ARPlantGame {
 
         const plant = plantDetector.getLatestPlant();
         if (!plant) {
-            console.log('No plant detected yet');
+            console.log('No plant detected yet, attaching orbs to wrist instead');
+            // Attach existing orbs to wrist
+            const allOrbs = orbCreator.getAllOrbs();
+            if (allOrbs.length > 0) {
+                orbCreator.attachOrbsToWrist(allOrbs);
+                this.updateStatus('Orbs attached to wrist');
+                setTimeout(() => this.updateStatus('AR Active'), 2000);
+            }
             return;
         }
 
@@ -325,6 +333,23 @@ class ARPlantGame {
         } catch (error) {
             console.error('Failed to create pendant from gesture:', error);
         }
+    }
+
+    /**
+     * Handle peace gesture - clear all AR objects
+     */
+    onPeaceGesture(handPosition) {
+        console.log('Peace gesture detected - clearing all AR objects');
+
+        // Clear all orbs
+        orbCreator.clearAllOrbs();
+
+        // Clear all pendants and connections
+        pendantCreator.clearAll();
+
+        // Update status
+        this.updateStatus('AR cleared');
+        setTimeout(() => this.updateStatus('AR Active'), 2000);
     }
 
 
@@ -355,6 +380,12 @@ class ARPlantGame {
         const currentTime = performance.now();
         const deltaTime = (currentTime - this.lastFrameTime) / 1000;
         this.lastFrameTime = currentTime;
+
+        // Update wrist tracking for orbs
+        const wristLandmarks = handTracking.getWristLandmarks();
+        if (wristLandmarks) {
+            orbCreator.updateWristPosition(wristLandmarks);
+        }
 
         // Update orbs
         orbCreator.update(deltaTime);

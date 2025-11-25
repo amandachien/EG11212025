@@ -21,8 +21,8 @@
 
   /* Neutrals */
   --color-bg: #0a0a0a;
-  --color-surface: rgba(20, 20, 20, 0.8);
-  --color-surface-light: rgba(40, 40, 40, 0.9);
+  --color-surface: rgba(255, 255, 255, 0.1);
+  --color-surface-light: rgba(255, 255, 255, 0.15);
   --color-text: #ffffff;
   --color-text-secondary: rgba(255, 255, 255, 0.7);
   --color-text-tertiary: rgba(255, 255, 255, 0.5);
@@ -169,9 +169,9 @@ body {
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .status-dot {
@@ -210,9 +210,9 @@ body {
 .plant-info-panel,
 .env-data-panel {
   background: var(--color-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   transition: all var(--transition-base);
@@ -431,9 +431,9 @@ body {
   gap: var(--spacing-md);
   padding: var(--spacing-sm);
   background: var(--color-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-panel);
@@ -488,6 +488,12 @@ body {
 .control-btn svg {
   position: relative;
   z-index: 1;
+}
+
+.control-btn .material-symbols-outlined {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
 }
 
 /* ===================================
@@ -551,9 +557,9 @@ body {
   gap: var(--spacing-md);
   padding: var(--spacing-xl);
   background: var(--color-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-loading);

@@ -15,7 +15,8 @@ class HandTracking {
         this.gestureCallbacks = {
             pinch: [],
             openHand: [],
-            fist: []
+            fist: [],
+            peace: []
         };
         this.currentGesture = null;
         this.handLandmarks = null;
@@ -125,6 +126,11 @@ class HandTracking {
         // Detect pinch (thumb tip close to index finger tip)
         if (this.isPinch(landmarks)) {
             return 'pinch';
+        }
+
+        // Detect peace gesture (index + middle extended, ring + pinky closed)
+        if (this.isPeace(landmarks)) {
+            return 'peace';
         }
 
         // Detect open hand (all fingers extended)
@@ -242,6 +248,38 @@ class HandTracking {
     }
 
     /**
+     * Check if hand is making peace gesture (index + middle extended, others closed)
+     */
+    isPeace(landmarks) {
+        // Check index finger extended (tip above PIP)
+        const indexTip = landmarks[8];
+        const indexPIP = landmarks[6];
+        const indexExtended = indexTip.y < indexPIP.y;
+
+        // Check middle finger extended (tip above PIP)
+        const middleTip = landmarks[12];
+        const middlePIP = landmarks[10];
+        const middleExtended = middleTip.y < middlePIP.y;
+
+        // Check ring finger closed (tip below PIP)
+        const ringTip = landmarks[16];
+        const ringPIP = landmarks[14];
+        const ringClosed = ringTip.y > ringPIP.y;
+
+        // Check pinky closed (tip below PIP)
+        const pinkyTip = landmarks[20];
+        const pinkyPIP = landmarks[18];
+        const pinkyClosed = pinkyTip.y > pinkyPIP.y;
+
+        // Thumb should be somewhat extended or neutral (not strictly required)
+        const thumbTip = landmarks[4];
+        const thumbIP = landmarks[3];
+        const thumbNotPinching = Math.abs(thumbTip.x - indexTip.x) > 0.1;
+
+        return indexExtended && middleExtended && ringClosed && pinkyClosed && thumbNotPinching;
+    }
+
+    /**
      * Handle detected gesture
      */
     handleGesture(gesture, landmarks) {
@@ -283,6 +321,24 @@ class HandTracking {
             x: wrist.x,
             y: wrist.y,
             z: wrist.z
+        };
+    }
+
+    /**
+     * Get wrist landmarks for tracking
+     * @returns {Object|null} Wrist position and orientation data
+     */
+    getWristLandmarks() {
+        if (!this.handLandmarks) return null;
+
+        const wrist = this.handLandmarks[0];
+        const indexMCP = this.handLandmarks[5];
+        const pinkyMCP = this.handLandmarks[17];
+
+        return {
+            position: wrist,
+            indexMCP: indexMCP,
+            pinkyMCP: pinkyMCP
         };
     }
 

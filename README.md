@@ -7,11 +7,20 @@ An interactive WebAR mobile game that combines plant detection, hand gesture con
 - **Plant Detection**: Point your camera at any plant to identify it using AI (with PlantNet fallback)
 - **Hand Gestures**: 
   - 🤏 **Pinch** to create environmental data orbs (improved reliability with 200ms cooldown)
-  - ✋ **Open hand** to create plant pendants
-- **Y3K Aesthetic Orbs**:
-  - Futuristic metallic/holographic appearance
-  - Silver, neon pink, and electric blue gradients
+  - ✋ **Open hand** to attach orbs to wrist or create plant pendants
+  - ✌️ **Peace sign** to clear all AR objects (orbs, pendants, connections)
+- **Wrist-Wrapping Orbs**:
+  - Orbs arrange in circular pattern around your wrist
+  - Follow hand movement in real-time
+  - Persist after gesture completes
+- **Y3K Aesthetic**:
+  - Orbs: Futuristic metallic/holographic appearance with silver, neon pink, and electric blue gradients
+  - Pendant Frames: Animated Y3K shader with color-shifting gradients
   - Pseudo-environment reflections for glossy look
+- **Liquid Glass UI**:
+  - Semi-transparent white panels (10% opacity)
+  - Heavy blur effect (40px) for premium liquid glass appearance
+  - Material Design 3 icons throughout interface
 - **Environmental Data Visualization**:
   - Orb colors represent air quality
   - Orb shapes represent weather conditions
@@ -146,7 +155,7 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 - An orb will appear at your hand position
 
 **Method 2: Manual**
-- Tap the orb button (⭕) to create an orb in front of you
+- Tap the orb button (bubble chart icon) to create an orb in front of you
 
 **Orb Visual Meaning:**
 - **Aesthetic**: Y3K futuristic style with metallic/holographic appearance
@@ -158,18 +167,35 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 - **Animation**: Temperature (slower=cold, faster=hot)
 - **Reflections**: Pseudo-environment reflections for glossy, premium look
 
+### Attaching Orbs to Wrist
+
+**Method: Open Hand Gesture (without plant detected)**
+- Extend all fingers (open hand)
+- Existing orbs will arrange in a circular pattern around your wrist
+- Orbs will follow your hand movement in real-time
+- The wrist-wrapping persists until you use the peace gesture
+
 ### Creating Plant Pendants
 
 **Prerequisites**: Detect a plant first
 
-**Method 1: Open Hand Gesture**
+**Method 1: Open Hand Gesture (with plant detected)**
 - Extend all fingers (open hand)
 - A pendant will appear with the detected plant
+- Pendant frame features Y3K aesthetic with animated color-shifting gradients
 
 **Method 2: Manual**
-- Tap the pendant button (💎) after detecting a plant
+- Tap the pendant button (diamond icon) after detecting a plant
 
 **Connections**: White animated lines will automatically connect the pendant to all existing orbs.
+
+### Clearing AR Objects
+
+**Method: Peace Gesture**
+- Extend index and middle fingers (peace sign)
+- Keep ring and pinky fingers closed
+- All orbs, pendants, and connection lines will be removed
+- Provides a quick reset to start fresh
 
 ## PlantNet Fallback
 

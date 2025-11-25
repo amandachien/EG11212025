@@ -159,13 +159,65 @@ class PendantCreator {
         shape.holes.push(holePath);
 
         const geometry = new THREE.ShapeGeometry(shape);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0xffd700, // Gold color
+
+        // Y3K Shader Material
+        const vertexShader = `
+            varying vec3 vPosition;
+            varying vec2 vUv;
+            uniform float time;
+            
+            void main() {
+                vUv = uv;
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            varying vec3 vPosition;
+            varying vec2 vUv;
+            uniform float time;
+            
+            void main() {
+                // Y3K Color Palette
+                vec3 silver = vec3(0.9, 0.9, 1.0);
+                vec3 neonPink = vec3(1.0, 0.0, 0.8);
+                vec3 electricBlue = vec3(0.0, 0.8, 1.0);
+                
+                // Animated gradient based on position and time
+                float mixFactor1 = sin(vPosition.y * 10.0 + time) * 0.5 + 0.5;
+                float mixFactor2 = cos(vPosition.x * 10.0 + time * 0.7) * 0.5 + 0.5;
+                
+                // Mix colors
+                vec3 color1 = mix(silver, neonPink, mixFactor1);
+                vec3 color2 = mix(electricBlue, silver, mixFactor2);
+                vec3 finalColor = mix(color1, color2, 0.5);
+                
+                // Add metallic shine
+                float shine = pow(mixFactor1 * mixFactor2, 2.0);
+                finalColor += shine * 0.3;
+                
+                // Pulsing effect
+                float pulse = sin(time * 2.0) * 0.1 + 0.9;
+                
+                gl_FragColor = vec4(finalColor * pulse, 1.0);
+            }
+        `;
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            uniforms: {
+                time: { value: 0 }
+            },
             side: THREE.DoubleSide
         });
 
         const frame = new THREE.Mesh(geometry, material);
         frame.position.z = -0.001; // Slightly behind the pendant
+
+        // Store material for animation
+        frame.userData.isY3KFrame = true;
 
         return frame;
     }
@@ -243,9 +295,16 @@ class PendantCreator {
      * Update pendant and connection animations
      */
     update(deltaTime) {
-        // Update pendant rotations
+        // Update pendant rotations and Y3K frame animations
         this.pendants.forEach(pendant => {
             pendant.rotation.y += deltaTime * 0.5;
+
+            // Update Y3K frame shader time
+            pendant.traverse(child => {
+                if (child.userData.isY3KFrame && child.material.uniforms) {
+                    child.material.uniforms.time.value += deltaTime;
+                }
+            });
         });
 
         // Update connections

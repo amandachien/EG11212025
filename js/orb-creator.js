@@ -10,6 +10,10 @@ class OrbCreator {
         this.orbs = [];
         this.scene = null;
         this.liquidShaderMaterial = null;
+        this.wristOrbs = []; // Orbs attached to wrist
+        this.wristPosition = null;
+        this.wristOrientation = null;
+        this.isWristTracking = false;
     }
 
     /**
@@ -311,9 +315,98 @@ class OrbCreator {
                 orb.material.uniforms.time.value += deltaTime * orb.userData.animationSpeed;
             }
 
-            // Gentle floating animation
-            orb.position.y += Math.sin(Date.now() * 0.001 + orb.userData.createdAt) * 0.0001;
+            // Gentle floating animation for non-wrist orbs
+            if (!orb.userData.attachedToWrist) {
+                orb.position.y += Math.sin(Date.now() * 0.001 + orb.userData.createdAt) * 0.0001;
+            }
         });
+
+        // Update wrist-attached orbs
+        if (this.isWristTracking && this.wristPosition) {
+            this.updateWristOrbPositions();
+        }
+    }
+
+    /**
+     * Attach orbs to wrist in circular pattern
+     * @param {Array} orbs - Orbs to attach to wrist
+     */
+    attachOrbsToWrist(orbs) {
+        if (!orbs || orbs.length === 0) return;
+
+        this.wristOrbs = orbs;
+        this.isWristTracking = true;
+
+        // Mark orbs as attached
+        orbs.forEach(orb => {
+            orb.userData.attachedToWrist = true;
+        });
+
+        console.log(`Attached ${orbs.length} orbs to wrist`);
+    }
+
+    /**
+     * Update wrist position from hand tracking landmarks
+     * @param {Object} wristLandmarks - Wrist landmark data from hand tracking
+     */
+    updateWristPosition(wristLandmarks) {
+        if (!wristLandmarks) {
+            this.wristPosition = null;
+            this.wristOrientation = null;
+            return;
+        }
+
+        this.wristPosition = wristLandmarks.position;
+        this.wristOrientation = {
+            indexMCP: wristLandmarks.indexMCP,
+            pinkyMCP: wristLandmarks.pinkyMCP
+        };
+    }
+
+    /**
+     * Update positions of wrist-attached orbs in circular pattern
+     */
+    updateWristOrbPositions() {
+        if (!this.wristPosition || this.wristOrbs.length === 0) return;
+
+        const radius = 0.08; // Radius of circle around wrist
+        const numOrbs = this.wristOrbs.length;
+
+        this.wristOrbs.forEach((orb, index) => {
+            // Calculate angle for this orb
+            const angle = (2 * Math.PI * index) / numOrbs;
+
+            // Calculate position in circle
+            const offsetX = radius * Math.cos(angle);
+            const offsetY = radius * Math.sin(angle);
+
+            // Convert wrist position to AR space (normalized to world coordinates)
+            // Wrist position is in normalized screen coordinates (0-1)
+            const wristX = (this.wristPosition.x - 0.5) * 2;
+            const wristY = -(this.wristPosition.y - 0.5) * 2;
+            const wristZ = this.wristPosition.z || -0.5;
+
+            // Set orb position
+            orb.position.set(
+                wristX + offsetX,
+                wristY + offsetY,
+                wristZ
+            );
+        });
+    }
+
+    /**
+     * Detach orbs from wrist
+     */
+    detachOrbsFromWrist() {
+        this.wristOrbs.forEach(orb => {
+            orb.userData.attachedToWrist = false;
+        });
+        this.wristOrbs = [];
+        this.isWristTracking = false;
+        this.wristPosition = null;
+        this.wristOrientation = null;
+        console.log('Detached orbs from wrist');
     }
 
     /**
@@ -344,7 +437,11 @@ class OrbCreator {
      * Clear all orbs
      */
     clearAllOrbs() {
-        this.orbs.forEach(orb => this.removeOrb(orb));
+        // Detach from wrist first
+        this.detachOrbsFromWrist();
+
+        // Remove all orbs
+        [...this.orbs].forEach(orb => this.removeOrb(orb));
         this.orbs = [];
     }
 }
