@@ -370,33 +370,33 @@ class OrbCreator {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
         // Small radius for bracelet
-        const radius = 0.02; // Small but visible radius
+        const radius = 0.05; // Slightly larger for visibility
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
             // Use compact arc around hand
-            const startAngle = -Math.PI * 0.39; // -70 degrees
-            const endAngle = Math.PI * 0.39;    // +70 degrees
+            const startAngle = -Math.PI * 0.5; // -90 degrees
+            const endAngle = Math.PI * 0.5;    // +90 degrees
             const angleRange = endAngle - startAngle;
 
             // Calculate angle for this orb within the arc
             const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
 
-            // Calculate offset
+            // Calculate offset in AR space
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 
-            // Use hand position DIRECTLY without any transformation
-            // MediaPipe gives us normalized coordinates that work in AR space
-            const handX = this.wristPosition.x;
-            const handY = this.wristPosition.y;
-            const handZ = -(this.wristPosition.z || 0.5); // Only flip Z
+            // Convert hand position to AR space (same as pinch gesture)
+            // This matches how orbs are created in onPinchGesture
+            const baseX = (this.wristPosition.x - 0.5) * 2;
+            const baseY = -(this.wristPosition.y - 0.5) * 2;
+            const baseZ = -(this.wristPosition.z || 0.5);
 
-            // Set orb position - use coordinates directly
+            // Set orb position with offset
             orb.position.set(
-                handX + offsetX,
-                handY + offsetY,
-                handZ
+                baseX + offsetX,
+                baseY + offsetY,
+                baseZ
             );
         });
     }

@@ -344,33 +344,33 @@ class PendantCreator {
         if (!orbCreator.wristPosition) return;
 
         // Small radius for bracelet
-        const radius = 0.02; // Small but visible radius
+        const radius = 0.05; // Slightly larger for visibility
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
         // Use compact arc - same as orbs
-        const startAngle = -Math.PI * 0.39; // -70 degrees
-        const endAngle = Math.PI * 0.39;    // +70 degrees
+        const startAngle = -Math.PI * 0.5; // -90 degrees
+        const endAngle = Math.PI * 0.5;    // +90 degrees
         const angleRange = endAngle - startAngle;
 
         // Calculate angle for this pendant within the arc
         const angle = startAngle + (angleRange * index) / Math.max(totalObjects - 1, 1);
 
-        // Calculate offset
+        // Calculate offset in AR space
         const offsetX = radius * Math.cos(angle);
         const offsetY = radius * Math.sin(angle);
 
-        // Use hand position DIRECTLY without any transformation
-        const handX = orbCreator.wristPosition.x;
-        const handY = orbCreator.wristPosition.y;
-        const handZ = -(orbCreator.wristPosition.z || 0.5); // Only flip Z
+        // Convert hand position to AR space (same as pinch gesture)
+        const baseX = (orbCreator.wristPosition.x - 0.5) * 2;
+        const baseY = -(orbCreator.wristPosition.y - 0.5) * 2;
+        const baseZ = -(orbCreator.wristPosition.z || 0.5);
 
-        // Set pendant position - use coordinates directly
+        // Set pendant position with offset
         pendant.position.set(
-            handX + offsetX,
-            handY + offsetY,
-            handZ
+            baseX + offsetX,
+            baseY + offsetY,
+            baseZ
         );
     }
 
