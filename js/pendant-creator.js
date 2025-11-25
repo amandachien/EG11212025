@@ -370,7 +370,7 @@ class PendantCreator {
         pendant.position.set(
             baseX + offsetX,
             baseY + offsetY,
-            baseZ - 0.2 // Move closer to camera (negative Z)
+            baseZ - 1 // Move much closer to camera
         );
     }
 
