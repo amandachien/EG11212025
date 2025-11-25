@@ -369,14 +369,15 @@ class OrbCreator {
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        const radius = 0.08; // Radius of circle around wrist
+        // Smaller radius to keep orbs closer to wrist and visible
+        const radius = 0.04; // Reduced from 0.08 to keep objects closer
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
-            // Use semi-circle arc (180 degrees) in front of wrist to keep objects visible
-            // Start from -90 degrees (left) to +90 degrees (right)
-            const startAngle = -Math.PI / 2; // -90 degrees
-            const endAngle = Math.PI / 2;    // +90 degrees
+            // Use tighter semi-circle arc (120 degrees) centered in front of wrist
+            // Start from -60 degrees to +60 degrees for better visibility
+            const startAngle = -Math.PI / 3; // -60 degrees
+            const endAngle = Math.PI / 3;    // +60 degrees
             const angleRange = endAngle - startAngle;
 
             // Calculate angle for this orb within the arc
@@ -392,11 +393,11 @@ class OrbCreator {
             const wristY = -(this.wristPosition.y - 0.5) * 2;
             const wristZ = this.wristPosition.z || -0.5;
 
-            // Set orb position
+            // Set orb position with slight Z offset to keep in view
             orb.position.set(
                 wristX + offsetX,
                 wristY + offsetY,
-                wristZ
+                wristZ + 0.02 // Slight forward offset to keep in camera view
             );
         });
     }

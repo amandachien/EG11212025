@@ -343,14 +343,15 @@ class PendantCreator {
         // Get wrist position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        const radius = 0.08; // Same radius as orbs
+        // Smaller radius to match orbs - keep objects closer and visible
+        const radius = 0.04; // Reduced from 0.08
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
 
-        // Use semi-circle arc (180 degrees) in front of wrist - same as orbs
-        const startAngle = -Math.PI / 2; // -90 degrees
-        const endAngle = Math.PI / 2;    // +90 degrees
+        // Use tighter semi-circle arc (120 degrees) - same as orbs
+        const startAngle = -Math.PI / 3; // -60 degrees
+        const endAngle = Math.PI / 3;    // +60 degrees
         const angleRange = endAngle - startAngle;
 
         // Calculate angle for this pendant within the arc
@@ -365,11 +366,11 @@ class PendantCreator {
         const wristY = -(orbCreator.wristPosition.y - 0.5) * 2;
         const wristZ = orbCreator.wristPosition.z || -0.5;
 
-        // Set pendant position
+        // Set pendant position with slight Z offset
         pendant.position.set(
             wristX + offsetX,
             wristY + offsetY,
-            wristZ
+            wristZ + 0.02 // Slight forward offset to keep in camera view
         );
     }
 
