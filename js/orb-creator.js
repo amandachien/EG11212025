@@ -364,7 +364,7 @@ class OrbCreator {
     }
 
     /**
-     * Update positions of hand-attached orbs in circular orbit
+     * Update positions of hand-attached orbs in 3D spherical orbit
      */
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
@@ -377,25 +377,30 @@ class OrbCreator {
         const time = Date.now() * 0.0005; // Slow rotation
 
         this.wristOrbs.forEach((orb, index) => {
-            // Distribute orbs evenly in a circle
+            // Distribute orbs evenly around sphere
             const angleOffset = (2 * Math.PI * index) / numOrbs;
-            const angle = time + angleOffset;
 
-            // Calculate orbit position (circular motion in XY plane)
-            const offsetX = orbitRadius * Math.cos(angle);
-            const offsetY = orbitRadius * Math.sin(angle);
+            // Horizontal rotation (around Y-axis)
+            const horizontalAngle = time + angleOffset;
+
+            // Vertical rotation (around X-axis) - creates 3D effect
+            const verticalAngle = time * 0.7 + angleOffset * 0.5;
+
+            // Calculate 3D spherical position
+            const offsetX = orbitRadius * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
+            const offsetY = orbitRadius * Math.sin(verticalAngle);
+            const offsetZ = orbitRadius * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
 
             // Convert hand position to AR space
             const baseX = (this.wristPosition.x - 0.5) * 2;
             const baseY = -(this.wristPosition.y - 0.5) * 2;
             const baseZ = -(this.wristPosition.z || 0.5);
 
-            // Set orb position - orbiting around palm center
-            // Subtract Z-offset to bring orbit CLOSER to camera
+            // Set orb position - orbiting around hand in 3D
             orb.position.set(
                 baseX + offsetX,
                 baseY + offsetY,
-                baseZ - 1 // Move much closer to camera
+                baseZ + offsetZ - 1 // Base Z-offset plus orbital Z
             );
         });
     }

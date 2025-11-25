@@ -336,14 +336,14 @@ class PendantCreator {
     }
 
     /**
-     * Update hand-attached pendant position
+     * Update hand-attached pendant position in 3D spherical orbit
      * @param {THREE.Group} pendant - Pendant to update
      */
     updateWristPendantPosition(pendant) {
         // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Orbit radius - same as orbs for consistent circle
+        // Orbit radius - same as orbs for consistent sphere
         const orbitRadius = 0.15; // Larger radius for clear visibility
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
@@ -352,25 +352,30 @@ class PendantCreator {
         // Animate orbit rotation over time
         const time = Date.now() * 0.0005; // Slow rotation
 
-        // Distribute objects evenly in a circle
+        // Distribute objects evenly around sphere
         const angleOffset = (2 * Math.PI * index) / totalObjects;
-        const angle = time + angleOffset;
 
-        // Calculate orbit position (circular motion in XY plane)
-        const offsetX = orbitRadius * Math.cos(angle);
-        const offsetY = orbitRadius * Math.sin(angle);
+        // Horizontal rotation (around Y-axis)
+        const horizontalAngle = time + angleOffset;
+
+        // Vertical rotation (around X-axis) - creates 3D effect
+        const verticalAngle = time * 0.7 + angleOffset * 0.5;
+
+        // Calculate 3D spherical position
+        const offsetX = orbitRadius * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
+        const offsetY = orbitRadius * Math.sin(verticalAngle);
+        const offsetZ = orbitRadius * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
 
         // Convert hand position to AR space
         const baseX = (orbCreator.wristPosition.x - 0.5) * 2;
         const baseY = -(orbCreator.wristPosition.y - 0.5) * 2;
         const baseZ = -(orbCreator.wristPosition.z || 0.5);
 
-        // Set pendant position - orbiting around palm center
-        // Subtract Z-offset to bring orbit CLOSER to camera
+        // Set pendant position - orbiting around hand in 3D
         pendant.position.set(
             baseX + offsetX,
             baseY + offsetY,
-            baseZ - 1 // Move much closer to camera
+            baseZ + offsetZ - 1 // Base Z-offset plus orbital Z
         );
     }
 
