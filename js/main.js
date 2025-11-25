@@ -89,6 +89,20 @@ class ARPlantGame {
         this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant());
         this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual());
         this.ui.createPendantBtn.addEventListener('click', () => this.createPendantManual());
+
+        // Demo mode toggle
+        const demoModeCheckbox = document.getElementById('demo-mode-checkbox');
+        if (demoModeCheckbox) {
+            demoModeCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    plantDetector.enableDemoMode();
+                    this.updateStatus('Demo Mode Active');
+                } else {
+                    plantDetector.disableDemoMode();
+                    this.updateStatus('Ready');
+                }
+            });
+        }
     }
 
     /**

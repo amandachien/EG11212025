@@ -53,34 +53,38 @@
 
   <!-- UI Overlay -->
   <div id="ui-overlay">
-    <!-- Header -->
-    <header class="app-header">
-      <h1 class="app-title">pLaNt ExPlorEr</h1>
-      <div class="status-indicator" id="status-indicator">
-        <span class="status-dot"></span>
-        <span class="status-text">Initializing...</span>
-      </div>
-    </header>
+    <!-- Status Indicator (no header) -->
+    <div class="status-indicator" id="status-indicator">
+      <span class="status-dot"></span>
+      <span class="status-text">Initializing...</span>
+    </div>
 
     <!-- Instructions Panel -->
     <div class="instructions-panel" id="instructions-panel">
       <div class="panel-content">
         <h2>How to Play</h2>
         <div class="instruction-item">
-          <span class="instruction-icon">📱</span>
+          <span class="material-symbols-outlined instruction-icon">photo_camera</span>
           <p><strong>Point at a plant</strong> to identify it</p>
         </div>
         <div class="instruction-item">
-          <span class="instruction-icon">🤏</span>
+          <span class="material-symbols-outlined instruction-icon">pinch</span>
           <p><strong>Pinch</strong> to create environmental orb</p>
         </div>
         <div class="instruction-item">
-          <span class="instruction-icon">✋</span>
+          <span class="material-symbols-outlined instruction-icon">pan_tool</span>
           <p><strong>Open hand</strong> to attach orbs to wrist or create pendant</p>
         </div>
         <div class="instruction-item">
-          <span class="instruction-icon">✌️</span>
+          <span class="material-symbols-outlined instruction-icon">back_hand</span>
           <p><strong>Peace sign</strong> to clear all AR objects</p>
+        </div>
+        <div class="demo-mode-toggle">
+          <label class="toggle-label">
+            <input type="checkbox" id="demo-mode-checkbox">
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Demo Mode (No API quota used)</span>
+          </label>
         </div>
         <button class="btn-primary" id="start-btn">Start AR Experience</button>
       </div>

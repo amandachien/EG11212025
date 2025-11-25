@@ -9,6 +9,7 @@ class PlantDetector {
         this.detectedPlants = [];
         this.segmentationModel = null;
         this.currentPlantSegmentation = null;
+        this.demoMode = false; // Demo mode flag
     }
 
     /**
@@ -32,6 +33,65 @@ class PlantDetector {
     }
 
     /**
+     * Enable demo mode (no API calls)
+     */
+    enableDemoMode() {
+        this.demoMode = true;
+        console.log('Demo mode enabled - plant detection will use mock data');
+    }
+
+    /**
+     * Disable demo mode
+     */
+    disableDemoMode() {
+        this.demoMode = false;
+        console.log('Demo mode disabled - plant detection will use real API');
+    }
+
+    /**
+     * Get demo plant data (mock)
+     */
+    getDemoPlantData() {
+        const demoPlants = [
+            {
+                name: 'Monstera Deliciosa',
+                commonNames: ['Swiss Cheese Plant', 'Split-leaf Philodendron'],
+                scientificName: 'Monstera deliciosa',
+                probability: 0.95,
+                description: 'A species of flowering plant native to tropical forests of southern Mexico. Known for its large, glossy, heart-shaped leaves with natural holes and splits.',
+                source: 'Demo'
+            },
+            {
+                name: 'Pothos',
+                commonNames: ['Devil\'s Ivy', 'Golden Pothos'],
+                scientificName: 'Epipremnum aureum',
+                probability: 0.92,
+                description: 'A popular houseplant with heart-shaped leaves. Very easy to care for and can thrive in various lighting conditions.',
+                source: 'Demo'
+            },
+            {
+                name: 'Snake Plant',
+                commonNames: ['Mother-in-Law\'s Tongue', 'Sansevieria'],
+                scientificName: 'Dracaena trifasciata',
+                probability: 0.89,
+                description: 'A resilient succulent that can grow anywhere between 6 inches to several feet tall. Known for its air-purifying qualities.',
+                source: 'Demo'
+            },
+            {
+                name: 'Peace Lily',
+                commonNames: ['Spathiphyllum', 'White Sails'],
+                scientificName: 'Spathiphyllum wallisii',
+                probability: 0.88,
+                description: 'A tropical plant known for its elegant white flowers and ability to thrive in low light conditions.',
+                source: 'Demo'
+            }
+        ];
+
+        // Return random demo plant
+        return demoPlants[Math.floor(Math.random() * demoPlants.length)];
+    }
+
+    /**
      * Capture and identify plant from video frame
      * @param {HTMLVideoElement} videoElement - Video element
      * @returns {Promise<Object>} Plant identification result
@@ -45,6 +105,30 @@ class PlantDetector {
         this.isProcessing = true;
 
         try {
+            // Demo mode - return mock data
+            if (this.demoMode) {
+                console.log('Using demo mode - returning mock plant data');
+                const imageData = this.captureFrame(videoElement);
+                const demoData = this.getDemoPlantData();
+
+                const plant = {
+                    id: Date.now(),
+                    name: demoData.name,
+                    commonNames: demoData.commonNames,
+                    scientificName: demoData.scientificName,
+                    probability: demoData.probability,
+                    description: demoData.description,
+                    imageData: imageData,
+                    segmentation: null,
+                    timestamp: Date.now(),
+                    source: demoData.source
+                };
+
+                this.detectedPlants.push(plant);
+                return plant;
+            }
+
+            // Real API mode
             // Capture frame from video
             const imageData = this.captureFrame(videoElement);
 

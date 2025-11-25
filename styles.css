@@ -134,35 +134,13 @@ body {
 }
 
 /* ===================================
-   Header
+   Status Indicator (Top Right)
    =================================== */
 
-.app-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: var(--spacing-md);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(10, 10, 10, 0.9) 0%, rgba(10, 10, 10, 0) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: var(--z-ui);
-}
-
-.app-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-}
-
 .status-indicator {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -172,6 +150,7 @@ body {
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: var(--z-ui);
 }
 
 .status-dot {
@@ -272,6 +251,7 @@ body {
 .instruction-icon {
   font-size: 2rem;
   flex-shrink: 0;
+  color: var(--color-primary);
 }
 
 .instruction-item p {
@@ -283,6 +263,63 @@ body {
 .instruction-item strong {
   color: var(--color-text);
   font-weight: 600;
+}
+
+/* Demo Mode Toggle */
+.demo-mode-toggle {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: background var(--transition-base);
+  flex-shrink: 0;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition-base);
+}
+
+.toggle-label input[type="checkbox"]:checked+.toggle-slider {
+  background: var(--color-primary);
+}
+
+.toggle-label input[type="checkbox"]:checked+.toggle-slider::before {
+  transform: translateX(24px);
+}
+
+.toggle-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 /* Plant Info Panel */
