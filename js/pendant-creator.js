@@ -343,8 +343,8 @@ class PendantCreator {
         // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Very small radius to match orbs
-        const radius = 0.015; // Even smaller radius
+        // Much smaller radius to match orbs
+        const radius = 0.005; // Tiny radius for tight grouping
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
