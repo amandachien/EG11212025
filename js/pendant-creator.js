@@ -343,8 +343,8 @@ class PendantCreator {
         // Get hand center position from orb creator (imported at top of file)
         if (!orbCreator.wristPosition) return;
 
-        // Much smaller radius to match orbs
-        const radius = 0.005; // Tiny radius for tight grouping
+        // TEST: Use zero radius to see if objects appear at hand center
+        const radius = 0.0; // Zero radius - all objects at hand center
         const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
             orbCreator.wristOrbs.length;
         const index = pendant.userData.wristIndex;
@@ -357,7 +357,7 @@ class PendantCreator {
         // Calculate angle for this pendant within the arc
         const angle = startAngle + (angleRange * index) / Math.max(totalObjects - 1, 1);
 
-        // Calculate offset in normalized space
+        // Calculate offset (will be zero for now)
         const offsetX = radius * Math.cos(angle);
         const offsetY = radius * Math.sin(angle);
 
@@ -366,7 +366,7 @@ class PendantCreator {
         const handY = orbCreator.wristPosition.y;
         const handZ = orbCreator.wristPosition.z || 0.5;
 
-        // Set pendant position in normalized screen coordinates
+        // Set pendant position - directly at hand center for testing
         pendant.position.set(
             handX + offsetX - 0.5, // Center around 0
             -(handY + offsetY - 0.5), // Flip Y and center

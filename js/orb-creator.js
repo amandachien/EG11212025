@@ -369,8 +369,8 @@ class OrbCreator {
     updateWristOrbPositions() {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
-        // Much smaller radius to keep orbs very close to hand
-        const radius = 0.005; // Tiny radius for tight grouping
+        // TEST: Use zero radius to see if objects appear at hand center
+        const radius = 0.0; // Zero radius - all objects at hand center
         const numOrbs = this.wristOrbs.length;
 
         this.wristOrbs.forEach((orb, index) => {
@@ -382,7 +382,7 @@ class OrbCreator {
             // Calculate angle for this orb within the arc
             const angle = startAngle + (angleRange * index) / Math.max(numOrbs - 1, 1);
 
-            // Calculate offset in normalized space (very small)
+            // Calculate offset (will be zero for now)
             const offsetX = radius * Math.cos(angle);
             const offsetY = radius * Math.sin(angle);
 
@@ -391,7 +391,7 @@ class OrbCreator {
             const handY = this.wristPosition.y;
             const handZ = this.wristPosition.z || 0.5;
 
-            // Set orb position in normalized screen coordinates
+            // Set orb position - directly at hand center for testing
             orb.position.set(
                 handX + offsetX - 0.5, // Center around 0
                 -(handY + offsetY - 0.5), // Flip Y and center
