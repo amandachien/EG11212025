@@ -151,12 +151,11 @@ class ARPlantGame {
         try {
             this.showLoading('Requesting camera permission...');
 
-            // Request camera permissions FIRST, before showing instructions
+            // Request camera permissions FIRST
             await this.startCamera();
 
-            // Hide loading and show instructions after camera is granted
+            // Hide loading - instructions are already visible
             this.hideLoading();
-            this.ui.instructionsPanel.classList.remove('hidden');
 
             // Update button to continue
             this.ui.startBtn.textContent = 'Continue';
