@@ -148,24 +148,19 @@ Or push to your GitHub repository - Netlify will auto-deploy.
 **Method 2: Manual**
 - Tap the crosshair button (📱) to capture and identify
 
+## Weather Metrics & AR
+
+The AR experience is directly driven by real-time environmental data from your location:
+
+| Environmental Metric | AR Visual Effect | Details |
+|---------------------|------------------|---------|
+| **Air Quality (AQI)** | **Orb Color** | Base color shifts from Green (Good) → Yellow (Moderate) → Orange (Unhealthy) → Red (Very Unhealthy) → Purple (Hazardous), blended with Y3K palette (silver, neon pink, electric blue) |
+| **Weather Condition** | **Orb Shape** | Liquid surface morphs based on weather: Sphere (Clear), Elongated (Rain), Spiky (Storm) |
+| **Temperature** | **Animation Speed** | Ripple and morph speed increases with temperature: Slower (Cold) → Faster (Hot) |
+
+**Visual Style**: All orbs feature Y3K futuristic aesthetic with metallic/holographic appearance and pseudo-environment reflections for a premium, glossy look.
+
 ### Creating Environmental Orbs
-
-**Method 1: Pinch Gesture**
-- Make a pinch gesture with your thumb and index finger
-- An orb will appear at your hand position
-
-**Method 2: Manual**
-- Tap the orb button (bubble chart icon) to create an orb in front of you
-
-**Orb Visual Meaning:**
-- **Aesthetic**: Y3K futuristic style with metallic/holographic appearance
-- **Color**: Air quality blended with Y3K palette (silver, neon pink, electric blue)
-  - Green tones = good air quality
-  - Yellow/orange tones = moderate/unhealthy
-  - Red/purple tones = hazardous
-- **Shape**: Weather (sphere=clear, elongated=rain, spiky=storm)
-- **Animation**: Temperature (slower=cold, faster=hot)
-- **Reflections**: Pseudo-environment reflections for glossy, premium look
 
 ### Attaching Orbs to Wrist
 

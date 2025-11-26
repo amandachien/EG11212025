@@ -512,7 +512,14 @@ class OrbCreator {
                 tag.style.display = 'block';
 
                 // Update text with coordinates
-                tag.textContent = `X:${orb.position.x.toFixed(2)} Y:${orb.position.y.toFixed(2)} Z:${orb.position.z.toFixed(2)}`;
+                const newText = `X:${orb.position.x.toFixed(2)} Y:${orb.position.y.toFixed(2)} Z:${orb.position.z.toFixed(2)}`;
+
+                if (tag.textContent !== newText) {
+                    tag.textContent = newText;
+                    tag.classList.add('flash');
+                } else {
+                    tag.classList.remove('flash');
+                }
             } else {
                 tag.style.display = 'none';
             }

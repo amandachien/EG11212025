@@ -595,6 +595,10 @@ body {
   transform: translateY(0);
 }
 
+#continue-btn {
+  box-shadow: none;
+}
+
 /* ===================================
    Loading Spinner
    =================================== */
@@ -800,4 +804,12 @@ body {
   pointer-events: none;
   transform: translate(-50%, -50%);
   white-space: nowrap;
+  transition: all 0.1s ease;
+}
+
+.coordinate-tag.flash {
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 12px #00ff88;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
