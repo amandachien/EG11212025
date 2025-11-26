@@ -67,7 +67,9 @@ class ARPlantGame {
     initializeUI() {
         this.ui = {
             startBtn: document.getElementById('start-btn'),
+            landingPanel: document.getElementById('landing-panel'),
             instructionsPanel: document.getElementById('instructions-panel'),
+            continueBtn: document.getElementById('continue-btn'),
             plantInfoPanel: document.getElementById('plant-info-panel'),
             plantInfoContent: document.getElementById('plant-info-content'),
             closePlantInfo: document.getElementById('close-plant-info'),
@@ -85,6 +87,9 @@ class ARPlantGame {
 
         // Event listeners
         this.ui.startBtn.addEventListener('click', () => this.start());
+        if (this.ui.continueBtn) {
+            this.ui.continueBtn.addEventListener('click', () => this.onContinue());
+        }
         this.ui.closePlantInfo.addEventListener('click', () => this.hidePlantInfo());
         this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant());
         this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual());
@@ -143,7 +148,7 @@ class ARPlantGame {
     }
 
     /**
-     * Start AR experience
+     * Start AR experience (Step 1: Camera Permission)
      */
     async start() {
         if (this.isRunning) return;
@@ -151,41 +156,15 @@ class ARPlantGame {
         try {
             this.showLoading('Requesting camera permission...');
 
-            // Request camera permissions FIRST
+            // Request camera permissions
             await this.startCamera();
 
-            // Hide loading - instructions are already visible
+            // Hide loading
             this.hideLoading();
 
-            // Update button to continue
-            this.ui.startBtn.textContent = 'Continue';
-            this.ui.startBtn.onclick = async () => {
-                // Hide instructions
-                this.ui.instructionsPanel.classList.add('hidden');
-
-                this.showLoading('Initializing hand tracking...');
-
-                // Initialize hand tracking
-                this.updateStatus('Initializing hand tracking...');
-                await handTracking.initialize(this.videoElement);
-
-                // Register gesture callbacks
-                handTracking.on('pinch', (position) => this.onPinchGesture(position));
-                handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
-                handTracking.on('peace', (position) => this.onPeaceGesture(position));
-
-                this.isRunning = true;
-                this.hideLoading();
-                this.updateStatus('AR Active');
-
-                // Show environmental data panel
-                this.ui.envDataPanel.classList.remove('hidden');
-
-                // Start render loop
-                this.animate();
-
-                console.log('AR experience started');
-            };
+            // Hide landing panel and show instructions
+            this.ui.landingPanel.classList.add('hidden');
+            this.ui.instructionsPanel.classList.remove('hidden');
 
         } catch (error) {
             console.error('Failed to start AR experience:', error);
@@ -196,10 +175,49 @@ class ARPlantGame {
     }
 
     /**
+     * Continue to AR experience (Step 2: Initialize AR)
+     */
+    async onContinue() {
+        try {
+            // Hide instructions
+            this.ui.instructionsPanel.classList.add('hidden');
+
+            this.showLoading('Initializing hand tracking...');
+
+            // Initialize hand tracking
+            this.updateStatus('Initializing hand tracking...');
+            await handTracking.initialize(this.videoElement);
+
+            // Register gesture callbacks
+            handTracking.on('pinch', (position) => this.onPinchGesture(position));
+            handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
+            handTracking.on('peace', (position) => this.onPeaceGesture(position));
+
+            this.isRunning = true;
+            this.hideLoading();
+            this.updateStatus('AR Active');
+
+            // Show environmental data panel
+            this.ui.envDataPanel.classList.remove('hidden');
+
+            // Start render loop
+            this.animate();
+
+            console.log('AR experience started');
+        } catch (error) {
+            console.error('Failed to initialize AR:', error);
+            this.hideLoading();
+            this.updateStatus('Initialization failed');
+            alert('Failed to initialize AR components.');
+        }
+    }
+
+    /**
      * Start camera
      */
     async startCamera() {
         try {
+            console.log('Requesting camera permission...');
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
@@ -208,9 +226,11 @@ class ARPlantGame {
                 }
             });
 
+            console.log('Camera permission granted, starting video...');
             this.videoElement.srcObject = stream;
             await this.videoElement.play();
 
+            console.log('Camera started successfully');
             return true;
         } catch (error) {
             console.error('Camera access failed:', error);

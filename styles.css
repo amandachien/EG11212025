@@ -198,6 +198,7 @@ body {
 }
 
 /* Instructions Panel */
+.landing-panel,
 .instructions-panel {
   position: absolute;
   top: 50%;
@@ -208,6 +209,21 @@ body {
   padding: var(--spacing-lg);
   z-index: var(--z-modal);
   animation: fadeInScale 0.4s ease;
+}
+
+.landing-panel {
+  text-align: center;
+}
+
+.landing-panel h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
 }
 
 @keyframes fadeInScale {
