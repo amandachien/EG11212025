@@ -1,0 +1,15 @@
+mdl 1.6;
+
+import ::adobe::materials::*;
+import ::base::*;
+import ::state::*;
+import ::tex::*;
+
+export material water_material(*)
+  = ::adobe::materials::standard(
+    base_color: color(1.f),
+    roughness: 0.f,
+    translucency: 1.f,
+    absorption_distance: 1.f,
+    specular_ior: 1.33f
+  );
