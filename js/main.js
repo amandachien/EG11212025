@@ -52,6 +52,12 @@ class ARPlantGame {
             this.isInitialized = true;
             this.updateStatus('Ready');
 
+            // Auto-start after 3 seconds
+            setTimeout(() => {
+                console.log('Auto-starting AR experience...');
+                this.start();
+            }, 3000);
+
             console.log('AR Plant Game initialized successfully');
             return true;
         } catch (error) {
@@ -66,7 +72,7 @@ class ARPlantGame {
      */
     initializeUI() {
         this.ui = {
-            startBtn: document.getElementById('start-btn'),
+            startBtn: null, // Removed
             landingPanel: document.getElementById('landing-panel'),
             instructionsPanel: document.getElementById('instructions-panel'),
             continueBtn: document.getElementById('continue-btn'),
@@ -77,23 +83,24 @@ class ARPlantGame {
             statusIndicator: document.getElementById('status-indicator'),
             statusText: document.querySelector('.status-text'),
             loadingSpinner: document.getElementById('loading-spinner'),
-            detectPlantBtn: document.getElementById('detect-plant-btn'),
-            createOrbBtn: document.getElementById('create-orb-btn'),
-            createPendantBtn: document.getElementById('create-pendant-btn'),
+            detectPlantBtn: null, // Removed
+            createOrbBtn: null, // Removed
+            createPendantBtn: null, // Removed
             tempValue: document.getElementById('temp-value'),
             weatherValue: document.getElementById('weather-value'),
             aqiValue: document.getElementById('aqi-value')
         };
 
         // Event listeners
-        this.ui.startBtn.addEventListener('click', () => this.start());
+        // Event listeners
+        // this.ui.startBtn.addEventListener('click', () => this.start()); // Removed
         if (this.ui.continueBtn) {
             this.ui.continueBtn.addEventListener('click', () => this.onContinue());
         }
         this.ui.closePlantInfo.addEventListener('click', () => this.hidePlantInfo());
-        this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant());
-        this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual());
-        this.ui.createPendantBtn.addEventListener('click', () => this.createPendantManual());
+        // this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant()); // Removed
+        // this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual()); // Removed
+        // this.ui.createPendantBtn.addEventListener('click', () => this.createPendantManual()); // Removed
 
         // Demo mode toggle
         const demoModeCheckbox = document.getElementById('demo-mode-checkbox');
@@ -460,10 +467,10 @@ class ARPlantGame {
         }
 
         // Update orbs
-        orbCreator.update(deltaTime);
+        orbCreator.update(deltaTime, this.camera);
 
         // Update pendants and connections
-        pendantCreator.update(deltaTime);
+        pendantCreator.update(deltaTime, this.camera);
 
         // Render scene
         this.renderer.render(this.scene, this.camera);

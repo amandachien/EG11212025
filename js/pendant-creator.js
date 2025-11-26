@@ -11,6 +11,7 @@ class PendantCreator {
         this.pendants = [];
         this.connections = [];
         this.scene = null;
+        this.tagsContainer = document.getElementById('tags-container');
     }
 
     /**
@@ -69,6 +70,9 @@ class PendantCreator {
             if (this.pendants.length > CONFIG.performance.maxPendants) {
                 this.removePendant(this.pendants[0]);
             }
+
+            // Create coordinate tag
+            this.createTag(pendantGroup);
 
             return pendantGroup;
         } catch (error) {
@@ -295,8 +299,10 @@ class PendantCreator {
 
     /**
      * Update pendant and connection animations
+     * @param {number} deltaTime - Time since last frame
+     * @param {THREE.Camera} camera - Camera for projecting tags
      */
-    update(deltaTime) {
+    update(deltaTime, camera) {
         // Update pendant rotations and Y3K frame animations
         this.pendants.forEach(pendant => {
             // Update wrist-attached pendant positions
@@ -333,6 +339,11 @@ class PendantCreator {
                 connection.material.opacity = 0.3 + Math.sin(phase) * 0.3;
             }
         });
+
+        // Update tags
+        if (camera) {
+            this.updateTags(camera);
+        }
     }
 
     /**
@@ -415,6 +426,8 @@ class PendantCreator {
                 child.material.dispose();
             }
         });
+
+        this.removeTag(pendant);
     }
 
     /**
@@ -500,6 +513,54 @@ class PendantCreator {
         }
 
         console.log(`Created ${this.connections.length} bracelet connections`);
+    }
+    /**
+     * Create coordinate tag for a pendant
+     */
+    createTag(pendant) {
+        if (!this.tagsContainer) return;
+
+        const tag = document.createElement('div');
+        tag.className = 'coordinate-tag';
+        this.tagsContainer.appendChild(tag);
+        pendant.userData.tagElement = tag;
+    }
+
+    /**
+     * Remove coordinate tag
+     */
+    removeTag(pendant) {
+        if (pendant.userData.tagElement && pendant.userData.tagElement.parentNode) {
+            pendant.userData.tagElement.parentNode.removeChild(pendant.userData.tagElement);
+        }
+    }
+
+    /**
+     * Update all coordinate tags
+     */
+    updateTags(camera) {
+        this.pendants.forEach(pendant => {
+            const tag = pendant.userData.tagElement;
+            if (!tag) return;
+
+            // Project 3D position to 2D screen space
+            const position = pendant.position.clone();
+            position.project(camera);
+
+            // Check if visible (z < 1 means in front of camera)
+            if (position.z < 1) {
+                const x = (position.x * 0.5 + 0.5) * window.innerWidth;
+                const y = -(position.y * 0.5 - 0.5) * window.innerHeight;
+
+                tag.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                tag.style.display = 'block';
+
+                // Update text with coordinates
+                tag.textContent = `X:${pendant.position.x.toFixed(2)} Y:${pendant.position.y.toFixed(2)} Z:${pendant.position.z.toFixed(2)}`;
+            } else {
+                tag.style.display = 'none';
+            }
+        });
     }
 }
 

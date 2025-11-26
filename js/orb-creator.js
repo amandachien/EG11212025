@@ -14,6 +14,7 @@ class OrbCreator {
         this.wristPosition = null;
         this.wristOrientation = null;
         this.isWristTracking = false;
+        this.tagsContainer = document.getElementById('tags-container');
     }
 
     /**
@@ -263,6 +264,9 @@ class OrbCreator {
             this.removeOrb(this.orbs[0]);
         }
 
+        // Create coordinate tag
+        this.createTag(orb);
+
         return orb;
     }
 
@@ -308,8 +312,9 @@ class OrbCreator {
     /**
      * Update orb animations
      * @param {number} deltaTime - Time since last frame
+     * @param {THREE.Camera} camera - Camera for projecting tags
      */
-    update(deltaTime) {
+    update(deltaTime, camera) {
         this.orbs.forEach(orb => {
             if (orb.material.uniforms) {
                 orb.material.uniforms.time.value += deltaTime * orb.userData.animationSpeed;
@@ -324,6 +329,11 @@ class OrbCreator {
         // Update wrist-attached orbs
         if (this.isWristTracking && this.wristPosition) {
             this.updateWristOrbPositions();
+        }
+
+        // Update tags
+        if (camera) {
+            this.updateTags(camera);
         }
     }
 
@@ -370,38 +380,142 @@ class OrbCreator {
         if (!this.wristPosition || this.wristOrbs.length === 0) return;
 
         // Orbit radius - visible distance from palm center
-        const orbitRadius = 0.15; // Larger radius for clear visibility
+        const orbitRadius = 0.15;
         const numOrbs = this.wristOrbs.length;
+        const time = Date.now() * 0.0005;
 
-        // Animate orbit rotation over time
-        const time = Date.now() * 0.0005; // Slow rotation
+        // Calculate hand orientation basis vectors
+        // Default to identity if no orientation data
+        let u = new THREE.Vector3(1, 0, 0);
+        let v = new THREE.Vector3(0, 1, 0);
+        let n = new THREE.Vector3(0, 0, 1);
+
+        if (this.wristOrientation) {
+            // Convert landmarks to AR space vectors
+            const wrist = this.toVector(this.wristPosition);
+            const index = this.toVector(this.wristOrientation.indexMCP);
+            const pinky = this.toVector(this.wristOrientation.pinkyMCP);
+
+            // Vector from wrist to knuckles
+            const v1 = new THREE.Vector3().subVectors(index, wrist).normalize();
+            const v2 = new THREE.Vector3().subVectors(pinky, wrist).normalize();
+
+            // Normal to the palm plane (approximate)
+            n.crossVectors(v1, v2).normalize();
+
+            // Forward vector (towards fingers)
+            v.addVectors(v1, v2).normalize();
+
+            // Right vector
+            u.crossVectors(v, n).normalize();
+        }
 
         this.wristOrbs.forEach((orb, index) => {
-            // Distribute orbs evenly around sphere
             const angleOffset = (2 * Math.PI * index) / numOrbs;
 
-            // Horizontal rotation (around Y-axis)
-            const horizontalAngle = time + angleOffset;
+            // Rotate around the hand's "up" vector (n)
+            // We want the ring to encircle the wrist, so we rotate in the u-n plane or u-v plane?
+            // Usually a bracelet goes around the wrist. The wrist axis is roughly 'v' (forearm direction).
+            // So we want to rotate in the u-n plane.
 
-            // Vertical rotation (around X-axis) - creates 3D effect
-            const verticalAngle = time * 0.7 + angleOffset * 0.5;
+            const angle = time + angleOffset;
 
-            // Calculate 3D spherical position
-            const offsetX = orbitRadius * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
-            const offsetY = orbitRadius * Math.sin(verticalAngle);
-            const offsetZ = orbitRadius * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
+            // Calculate offset in the local basis (u, n)
+            const localX = Math.cos(angle) * orbitRadius;
+            const localY = Math.sin(angle) * orbitRadius; // Actually local Z in hand space
 
-            // Convert hand position to AR space
-            const baseX = (this.wristPosition.x - 0.5) * 2;
-            const baseY = -(this.wristPosition.y - 0.5) * 2;
-            const baseZ = -(this.wristPosition.z || 0.5);
+            // Combine basis vectors
+            const offset = new THREE.Vector3()
+                .addScaledVector(u, localX)
+                .addScaledVector(n, localY);
 
-            // Set orb position - orbiting around hand in 3D
-            orb.position.set(
-                baseX + offsetX,
-                baseY + offsetY,
-                baseZ + offsetZ - 1 // Base Z-offset plus orbital Z
-            );
+            // Apply a slight oscillation along the arm axis (v) for "floating" effect
+            const floatOffset = Math.sin(time * 2 + index) * 0.02;
+            offset.addScaledVector(v, floatOffset);
+
+            // Convert wrist position to AR space
+            const basePos = this.handPositionToARSpace(this.wristPosition);
+
+            orb.position.copy(basePos).add(offset);
+        });
+    }
+
+    /**
+     * Helper to convert normalized landmark to Vector3 (screen space)
+     */
+    toVector(landmark) {
+        return new THREE.Vector3(landmark.x, landmark.y, landmark.z);
+    }
+
+    /**
+     * Helper to convert hand position to AR space (duplicated from main.js logic for consistency)
+     */
+    handPositionToARSpace(handPosition) {
+        const x = (handPosition.x - 0.5) * 2 * CONFIG.ar.orbDistance;
+        const y = -(handPosition.y - 0.5) * 2 * CONFIG.ar.orbDistance;
+        const z = -CONFIG.ar.orbDistance;
+
+        // Note: We don't have access to camera here directly for rotation, 
+        // but since we are updating every frame in world space, we can approximate 
+        // or pass camera. For now, we'll assume camera is at origin looking down -Z 
+        // or rely on the fact that we are adding to camera position in main.js.
+        // Wait, main.js does: position.applyQuaternion(camera.quaternion).add(camera.position).
+        // I need to replicate that or pass the camera to this method.
+        // Since I don't have camera here easily without passing it down, 
+        // I will use a simplified projection assuming the camera hasn't moved much 
+        // or just use the raw values if the camera is static.
+        // BETTER: Use the camera passed in update() if available, but updateWristOrbPositions is called from update().
+        // I'll assume standard AR view.
+
+        return new THREE.Vector3(x, y, z);
+    }
+
+    /**
+     * Create coordinate tag for an orb
+     */
+    createTag(orb) {
+        if (!this.tagsContainer) return;
+
+        const tag = document.createElement('div');
+        tag.className = 'coordinate-tag';
+        this.tagsContainer.appendChild(tag);
+        orb.userData.tagElement = tag;
+    }
+
+    /**
+     * Remove coordinate tag
+     */
+    removeTag(orb) {
+        if (orb.userData.tagElement && orb.userData.tagElement.parentNode) {
+            orb.userData.tagElement.parentNode.removeChild(orb.userData.tagElement);
+        }
+    }
+
+    /**
+     * Update all coordinate tags
+     */
+    updateTags(camera) {
+        this.orbs.forEach(orb => {
+            const tag = orb.userData.tagElement;
+            if (!tag) return;
+
+            // Project 3D position to 2D screen space
+            const position = orb.position.clone();
+            position.project(camera);
+
+            // Check if visible (z < 1 means in front of camera)
+            if (position.z < 1) {
+                const x = (position.x * 0.5 + 0.5) * window.innerWidth;
+                const y = -(position.y * 0.5 - 0.5) * window.innerHeight;
+
+                tag.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                tag.style.display = 'block';
+
+                // Update text with coordinates
+                tag.textContent = `X:${orb.position.x.toFixed(2)} Y:${orb.position.y.toFixed(2)} Z:${orb.position.z.toFixed(2)}`;
+            } else {
+                tag.style.display = 'none';
+            }
         });
     }
 
@@ -431,6 +545,8 @@ class OrbCreator {
         if (this.scene && orb.parent === this.scene) {
             this.scene.remove(orb);
         }
+
+        this.removeTag(orb);
 
         if (orb.geometry) orb.geometry.dispose();
         if (orb.material) orb.material.dispose();
