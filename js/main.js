@@ -83,9 +83,9 @@ class ARPlantGame {
             statusIndicator: document.getElementById('status-indicator'),
             statusText: document.querySelector('.status-text'),
             loadingSpinner: document.getElementById('loading-spinner'),
-            detectPlantBtn: null, // Removed
-            createOrbBtn: null, // Removed
-            createPendantBtn: null, // Removed
+            detectPlantBtn: document.getElementById('detect-plant-btn'),
+            createOrbBtn: document.getElementById('create-orb-btn'),
+            createPendantBtn: document.getElementById('create-pendant-btn'),
             tempValue: document.getElementById('temp-value'),
             weatherValue: document.getElementById('weather-value'),
             aqiValue: document.getElementById('aqi-value')
@@ -98,9 +98,9 @@ class ARPlantGame {
             this.ui.continueBtn.addEventListener('click', () => this.onContinue());
         }
         this.ui.closePlantInfo.addEventListener('click', () => this.hidePlantInfo());
-        // this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant()); // Removed
-        // this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual()); // Removed
-        // this.ui.createPendantBtn.addEventListener('click', () => this.createPendantManual()); // Removed
+        this.ui.detectPlantBtn.addEventListener('click', () => this.detectPlant());
+        this.ui.createOrbBtn.addEventListener('click', () => this.createOrbManual());
+        this.ui.createPendantBtn.addEventListener('click', () => this.createPendantManual());
 
         // Demo mode toggle
         const demoModeCheckbox = document.getElementById('demo-mode-checkbox');

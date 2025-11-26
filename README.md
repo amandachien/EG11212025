@@ -1,4 +1,4 @@
-# pLaNt ExPlorEr 🌿
+# PLANT ID WebAR
 
 An interactive WebAR mobile game that combines plant detection, hand gesture controls, and environmental data visualization in augmented reality.
 
