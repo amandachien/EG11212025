@@ -149,34 +149,45 @@ class ARPlantGame {
         if (this.isRunning) return;
 
         try {
-            this.showLoading('Starting AR experience...');
+            this.showLoading('Requesting camera permission...');
 
-            // Hide instructions
-            this.ui.instructionsPanel.classList.add('hidden');
-
-            // Request camera permissions and start video
+            // Request camera permissions FIRST, before showing instructions
             await this.startCamera();
 
-            // Initialize hand tracking
-            this.updateStatus('Initializing hand tracking...');
-            await handTracking.initialize(this.videoElement);
-
-            // Register gesture callbacks
-            handTracking.on('pinch', (position) => this.onPinchGesture(position));
-            handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
-            handTracking.on('peace', (position) => this.onPeaceGesture(position));
-
-            this.isRunning = true;
+            // Hide loading and show instructions after camera is granted
             this.hideLoading();
-            this.updateStatus('AR Active');
+            this.ui.instructionsPanel.classList.remove('hidden');
 
-            // Show environmental data panel
-            this.ui.envDataPanel.classList.remove('hidden');
+            // Update button to continue
+            this.ui.startBtn.textContent = 'Continue';
+            this.ui.startBtn.onclick = async () => {
+                // Hide instructions
+                this.ui.instructionsPanel.classList.add('hidden');
 
-            // Start render loop
-            this.animate();
+                this.showLoading('Initializing hand tracking...');
 
-            console.log('AR experience started');
+                // Initialize hand tracking
+                this.updateStatus('Initializing hand tracking...');
+                await handTracking.initialize(this.videoElement);
+
+                // Register gesture callbacks
+                handTracking.on('pinch', (position) => this.onPinchGesture(position));
+                handTracking.on('openHand', (position) => this.onOpenHandGesture(position));
+                handTracking.on('peace', (position) => this.onPeaceGesture(position));
+
+                this.isRunning = true;
+                this.hideLoading();
+                this.updateStatus('AR Active');
+
+                // Show environmental data panel
+                this.ui.envDataPanel.classList.remove('hidden');
+
+                // Start render loop
+                this.animate();
+
+                console.log('AR experience started');
+            };
+
         } catch (error) {
             console.error('Failed to start AR experience:', error);
             this.hideLoading();
