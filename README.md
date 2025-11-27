@@ -291,6 +291,50 @@ For debugging, the app instance is available in the browser console:
 window.arPlantGame
 ```
 
+## 🙏🏼 Next Steps 🙏🏼
+
+### Future Improvements
+
+Here are some ideas to make the app even better:
+
+- **Enhanced Plant Database**: Integrate additional plant databases for better identification accuracy
+- **Offline Mode**: Cache plant data and enable offline plant identification
+- **Social Sharing**: Allow users to share their AR plant collections
+- **Plant Care Tips**: Display care instructions and growing tips for identified plants
+- **AR Filters**: Add fun AR filters and effects for plant photography
+- **Multi-language Support**: Translate the app into multiple languages
+- **Voice Commands**: Add voice control for hands-free operation
+- **Plant Journal**: Let users save and track plants they've identified over time
+
+### 🆘 Help Wanted
+
+**I Need Help: Improving the Bracelet Wrapping Feature**
+
+Currently, when users perform the Open Hand gesture, orbs and pendants (connected by white break-lines) arrange in a circular orbit around the wrist. However, I'm looking to improve this feature to make it wrap more naturally like a real bracelet.
+
+**Current Behavior:**
+- Orbs and pendants orbit in a 2D circular path around the wrist
+- Objects are evenly distributed using angle calculations
+- White dashed lines connect adjacent objects
+
+**Desired Improvement:**
+- Make the bracelet wrap more naturally around the wrist contour
+- Improve the 3D positioning to follow the wrist's cylindrical shape
+- Enhance the visual appearance to look more like a physical bracelet
+- Better hand orientation tracking for more realistic wrapping
+
+**Technical Details:**
+- Current implementation: `orb-creator.js` (lines 379-441) and `pendant-creator.js` (lines 349-432)
+- Uses basis vectors (u, v, n) calculated from hand landmarks
+- Rotates in the u-n plane perpendicular to the forearm
+
+**If you have ideas or solutions, please:**
+1. Open an issue on GitHub with your suggestions
+2. Submit a pull request with improvements
+3. Share examples or references of similar implementations
+
+Your contributions would be greatly appreciated! 🙏🏼
+
 ## Contributing
 
 Contributions are welcome! Please ensure:
