@@ -32,7 +32,7 @@ An interactive WebAR mobile game that combines plant detection, hand gesture con
   - Orb shapes represent weather conditions
   - Animation speed represents temperature
 - **AR Connections**: White animated lines connect pendants to orbs
-- **Space Mono Font**: Clean, modern monospace typography throughout
+- **Noto Sans Font**: Clean, modern sans-serif typography throughout
 
 ## Technology Stack
 
