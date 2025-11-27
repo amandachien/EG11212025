@@ -797,10 +797,10 @@ body {
   position: absolute;
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  padding: 2px 6px;
+  padding: 1px 3px;
   border-radius: 4px;
   font-family: 'Space Mono', monospace;
-  font-size: 10px;
+  font-size: 5px;
   pointer-events: none;
   transform: translate(-50%, -50%);
   white-space: nowrap;

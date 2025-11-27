@@ -280,8 +280,10 @@ class ARPlantGame {
         try {
             this.showLoading('Creating environmental orb...');
 
-            // Create orb in front of camera
-            const position = new THREE.Vector3(0, 0, -CONFIG.ar.orbDistance);
+            // Create orb in front of camera with random offset to prevent overlapping
+            const randomX = (Math.random() - 0.5) * 0.6; // ±0.3 units
+            const randomY = (Math.random() - 0.5) * 0.6; // ±0.3 units
+            const position = new THREE.Vector3(randomX, randomY, -CONFIG.ar.orbDistance);
             position.applyQuaternion(this.camera.quaternion);
             position.add(this.camera.position);
 

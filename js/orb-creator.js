@@ -508,7 +508,9 @@ class OrbCreator {
                 const x = (position.x * 0.5 + 0.5) * window.innerWidth;
                 const y = -(position.y * 0.5 - 0.5) * window.innerHeight;
 
-                tag.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                // Use absolute positioning to prevent upper-left corner glitch
+                tag.style.left = `${x}px`;
+                tag.style.top = `${y}px`;
                 tag.style.display = 'block';
 
                 // Update text with coordinates
@@ -521,6 +523,18 @@ class OrbCreator {
                     tag.classList.remove('flash');
                 }
             } else {
+                tag.style.display = 'none';
+            }
+        });
+    }
+
+    /**
+     * Hide all coordinate tags
+     */
+    hideAllTags() {
+        this.orbs.forEach(orb => {
+            const tag = orb.userData.tagElement;
+            if (tag) {
                 tag.style.display = 'none';
             }
         });
@@ -570,6 +584,9 @@ class OrbCreator {
      * Clear all orbs
      */
     clearAllOrbs() {
+        // Hide all tags first
+        this.hideAllTags();
+
         // Detach from wrist first
         this.detachOrbsFromWrist();
 
