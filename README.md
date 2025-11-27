@@ -310,7 +310,7 @@ Here are some ideas to make the app even better:
 
 **I Need Help: Improving the Bracelet Wrapping Feature**
 
-Currently, when users perform the Open Hand gesture, orbs and pendants (connected by white break-lines) arrange in a circular orbit around the wrist. However, I'm looking to improve this feature to make it wrap more naturally like a real bracelet.
+Currently, when users perform the Open Hand gesture, orbs and pendants (connected by white break-lines) arrange in a circular orbit following user's hand movement. However, I'm looking to improve this feature to make it wrap around user's wrist and more naturally like a real bracelet.
 
 **Current Behavior:**
 - Orbs and pendants orbit in a 2D circular path around the wrist
