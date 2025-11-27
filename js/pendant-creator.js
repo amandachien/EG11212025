@@ -347,47 +347,85 @@ class PendantCreator {
     }
 
     /**
-     * Update hand-attached pendant position in 3D spherical orbit
+     * Update hand-attached pendant position in same orbit as orbs
      * @param {THREE.Group} pendant - Pendant to update
      */
     updateWristPendantPosition(pendant) {
-        // Get hand center position from orb creator (imported at top of file)
+        // Get hand center position from orb creator
         if (!orbCreator.wristPosition) return;
 
-        // Orbit radius - same as orbs for consistent sphere
-        const orbitRadius = 0.15; // Larger radius for clear visibility
-        const totalObjects = this.pendants.filter(p => p.userData.attachedToWrist).length +
-            orbCreator.wristOrbs.length;
+        // Use same orbit radius as orbs for consistent circular path
+        const orbitRadius = 0.15;
+
+        // Get total number of objects (orbs + pendants) for even distribution
+        const totalObjects = orbCreator.wristOrbs.length +
+            this.pendants.filter(p => p.userData.attachedToWrist).length;
+
         const index = pendant.userData.wristIndex;
+        const time = Date.now() * 0.0005;
 
-        // Animate orbit rotation over time
-        const time = Date.now() * 0.0005; // Slow rotation
+        // Calculate hand orientation basis vectors (same as orbs)
+        let u = new THREE.Vector3(1, 0, 0);
+        let v = new THREE.Vector3(0, 1, 0);
+        let n = new THREE.Vector3(0, 0, 1);
 
-        // Distribute objects evenly around sphere
+        if (orbCreator.wristOrientation) {
+            // Convert landmarks to AR space vectors
+            const wrist = new THREE.Vector3(
+                orbCreator.wristPosition.x,
+                orbCreator.wristPosition.y,
+                orbCreator.wristPosition.z
+            );
+            const indexMCP = new THREE.Vector3(
+                orbCreator.wristOrientation.indexMCP.x,
+                orbCreator.wristOrientation.indexMCP.y,
+                orbCreator.wristOrientation.indexMCP.z
+            );
+            const pinkyMCP = new THREE.Vector3(
+                orbCreator.wristOrientation.pinkyMCP.x,
+                orbCreator.wristOrientation.pinkyMCP.y,
+                orbCreator.wristOrientation.pinkyMCP.z
+            );
+
+            // Vector from wrist to knuckles
+            const v1 = new THREE.Vector3().subVectors(indexMCP, wrist).normalize();
+            const v2 = new THREE.Vector3().subVectors(pinkyMCP, wrist).normalize();
+
+            // Normal to the palm plane
+            n.crossVectors(v1, v2).normalize();
+
+            // Forward vector (towards fingers)
+            v.addVectors(v1, v2).normalize();
+
+            // Right vector
+            u.crossVectors(v, n).normalize();
+        }
+
+        // Calculate angle offset based on total objects
         const angleOffset = (2 * Math.PI * index) / totalObjects;
+        const angle = time + angleOffset;
 
-        // Horizontal rotation (around Y-axis)
-        const horizontalAngle = time + angleOffset;
+        // Calculate offset in the local basis (u, n) - same as orbs
+        const localX = Math.cos(angle) * orbitRadius;
+        const localY = Math.sin(angle) * orbitRadius;
 
-        // Vertical rotation (around X-axis) - creates 3D effect
-        const verticalAngle = time * 0.7 + angleOffset * 0.5;
+        // Combine basis vectors
+        const offset = new THREE.Vector3()
+            .addScaledVector(u, localX)
+            .addScaledVector(n, localY);
 
-        // Calculate 3D spherical position
-        const offsetX = orbitRadius * Math.cos(horizontalAngle) * Math.cos(verticalAngle);
-        const offsetY = orbitRadius * Math.sin(verticalAngle);
-        const offsetZ = orbitRadius * Math.sin(horizontalAngle) * Math.cos(verticalAngle);
+        // Apply slight oscillation along arm axis for floating effect
+        const floatOffset = Math.sin(time * 2 + index) * 0.02;
+        offset.addScaledVector(v, floatOffset);
 
-        // Convert hand position to AR space
-        const baseX = (orbCreator.wristPosition.x - 0.5) * 2;
-        const baseY = -(orbCreator.wristPosition.y - 0.5) * 2;
-        const baseZ = -(orbCreator.wristPosition.z || 0.5);
+        // Convert wrist position to AR space (same method as orbs)
+        const x = (orbCreator.wristPosition.x - 0.5) * 2 * CONFIG.ar.orbDistance;
+        const y = -(orbCreator.wristPosition.y - 0.5) * 2 * CONFIG.ar.orbDistance;
+        const z = -CONFIG.ar.orbDistance;
+        const basePos = new THREE.Vector3(x, y, z);
 
-        // Set pendant position - orbiting around hand in 3D
-        pendant.position.set(
-            baseX + offsetX,
-            baseY + offsetY,
-            baseZ + offsetZ - 1 // Base Z-offset plus orbital Z
-        );
+        // Set pendant position
+        pendant.position.copy(basePos).add(offset);
     }
 
     /**
@@ -552,7 +590,9 @@ class PendantCreator {
                 const x = (position.x * 0.5 + 0.5) * window.innerWidth;
                 const y = -(position.y * 0.5 - 0.5) * window.innerHeight;
 
-                tag.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                // Use absolute positioning to prevent upper-left corner glitch (same as orbs)
+                tag.style.left = `${x}px`;
+                tag.style.top = `${y}px`;
                 tag.style.display = 'block';
 
                 // Update text with coordinates
