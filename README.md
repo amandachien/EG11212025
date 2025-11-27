@@ -2,6 +2,12 @@
 
 An interactive WebAR mobile game that combines plant detection, hand gesture controls, and environmental data visualization in augmented reality.
 
+## 🚀 Live Demo
+
+**Try it now:** [https://eg11212025.netlify.app/](https://eg11212025.netlify.app/)
+
+> **Note:** Best experienced on mobile devices with camera access enabled.
+
 ## Features
 
 - **Plant Detection**: Point your camera at any plant to identify it using AI (with PlantNet fallback)
