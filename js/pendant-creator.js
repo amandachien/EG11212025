@@ -476,9 +476,24 @@ class PendantCreator {
     }
 
     /**
+     * Hide all pendant coordinate tags
+     */
+    hideAllTags() {
+        this.pendants.forEach(pendant => {
+            const tag = pendant.userData.tagElement;
+            if (tag) {
+                tag.style.display = 'none';
+            }
+        });
+    }
+
+    /**
      * Clear all pendants and connections
      */
     clearAll() {
+        // Hide all tags first
+        this.hideAllTags();
+
         // Remove all connections first
         this.connections.forEach(connection => {
             if (this.scene && connection.parent === this.scene) {
